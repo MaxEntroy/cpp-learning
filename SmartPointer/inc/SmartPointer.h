@@ -1,9 +1,3 @@
-/*************************************************************************
-	> File Name: SmartPointer.h
-	> Author: Kang
-	> Mail:likang@tju.edu.cn 
-	> Created Time: 2017年08月25日 星期五 12时13分26秒
- ************************************************************************/
 #ifndef SMART_POINTER_H_
 #define SMART_POINTER_H_
 #include <iostream>
