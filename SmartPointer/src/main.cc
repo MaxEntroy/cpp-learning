@@ -1,9 +1,3 @@
-/*************************************************************************
-	> File Name: main.cc
-	> Author: Kang
-	> Mail:likang@tju.edu.cn 
-	> Created Time: 2017年08月25日 星期五 10时49分45秒
- ************************************************************************/
 #include "Pointer.h"
 #include "SmartPointer.h"
 struct Point{
