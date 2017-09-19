@@ -1,9 +1,3 @@
-/*************************************************************************
-	> File Name: Pointer.h
-	> Author: Kang
-	> Mail:likang@tju.edu.cn 
-	> Created Time: 2017年08月25日 星期五 10时07分39秒
- ************************************************************************/
 #ifndef POINTER_H_
 #define POINTER_H_
 #include <iostream>
