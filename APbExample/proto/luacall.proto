@@ -1,0 +1,9 @@
+syntax = "proto2";
+package qqnews;
+
+import "profile.proto";
+
+message LuaNewsInfo {
+    required uint32          lua_id    = 1;
+    optional KBUserInfo      user_info = 2;
+}

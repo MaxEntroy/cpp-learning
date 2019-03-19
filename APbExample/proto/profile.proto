@@ -1,0 +1,15 @@
+syntax = "proto2";
+package qqnews;
+
+message CatProfile {   //类目兴趣
+    optional string type = 1;   //类型，预留
+    optional string weight = 2; //权重
+    optional string lv1 = 3;    //一级类目
+    optional string lv2 = 4;    //二级类目
+    optional string lv3 = 5;    //三级类目
+    optional string lv4 = 6;    //四级类目
+}
+
+message KBUserInfo {
+    repeated CatProfile cat_profile = 1;
+} 
