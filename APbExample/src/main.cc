@@ -4,7 +4,7 @@
 
 void Client(std::string* output) {
     std::cout << "Client called." << std::endl;
-    
+
     qqnews::LuaNewsInfo luanewsinfo;
 
     int lua_id = 1;
@@ -12,7 +12,7 @@ void Client(std::string* output) {
     luanewsinfo.set_lua_id(lua_id);
 
     qqnews::KBUserInfo* user_info = luanewsinfo.mutable_user_info();
-    
+
     qqnews::CatProfile* cat_profile1 = user_info->add_cat_profile();
 
     std::string type("");
@@ -87,14 +87,74 @@ void Server(const std::string& data) {
     const int cat_profile_sz = user_info.cat_profile_size();
     for(int i = 0; i < cat_profile_sz; ++i) {
         const qqnews::CatProfile& cat_profile = user_info.cat_profile(i);
-        
+
+        const std::string& type = cat_profile.type();
+        std::cout << "type: " << type << std::endl;
+
+        const std::string& weight = cat_profile.weight();
+        std::cout << "weight: " << weight << std::endl;
+
         const std::string& lv1 = cat_profile.lv1();
         std::cout << "lv1: " << lv1 << std::endl;
 
         const std::string& lv2 = cat_profile.lv2();
         std::cout << "lv2: " << lv2 << std::endl;
+
+        const std::string& lv3 = cat_profile.lv3();
+        std::cout << "lv3: " << lv3 << std::endl;
+
+        const std::string& lv4 = cat_profile.lv4();
+        std::cout << "lv4: " << lv4 << std::endl;
     }
 
+}
+
+void ServerWithReflection(const std::string& data) {
+    std::cout << "ServerWithReflection called." << std::endl;
+
+    qqnews::LuaNewsInfo luanewsinfo;
+    luanewsinfo.ParseFromString(data);
+
+    // lua_id是固定字段，并不存在总是修改的情形，所以不用反射
+    // 反射使用相对麻烦，如果不是刚需，建议不用
+    int lua_id = 0;
+    lua_id = luanewsinfo.lua_id();
+    std::cout << "lua_id: " << lua_id << std::endl;
+
+    const qqnews::KBUserInfo& user_info = luanewsinfo.user_info();
+    const int cat_profile_sz = user_info.cat_profile_size();
+    for(int i = 0; i < cat_profile_sz; ++i) {
+        const qqnews::CatProfile& cat_profile = user_info.cat_profile(i);
+
+        // CatProfile存在经常变更的情形
+        // 如果每次pb修改，相应的解析部分都要修改
+        // 由于不可能知道未来还有什么字段，所以，只能增加新字段，再增加解析函数，不灵活
+        // 采用反射避免
+        const ::google::protobuf::Descriptor* p_descriptor = cat_profile.GetDescriptor();
+        const ::google::protobuf::Reflection* p_reflection = cat_profile.GetReflection();
+        const ::google::protobuf::FieldDescriptor* p_field_descriptor = NULL;
+
+        std::string name = p_descriptor->name();
+        std::cout << "name: " << name << std::endl;
+
+        int field_count = p_descriptor->field_count();
+        for(int j = 0; j < field_count; ++j) {
+            p_field_descriptor = p_descriptor->field(j);
+            const ::google::protobuf::FieldDescriptor::CppType cpp_type = p_field_descriptor->cpp_type();
+
+            std::string key = p_field_descriptor->name();
+            std::string value;
+
+            switch(cpp_type) {
+                case ::google::protobuf::FieldDescriptor::CPPTYPE_STRING:
+                    value = p_reflection->GetString(cat_profile, p_field_descriptor);
+                    break;
+                default:break;
+            }
+
+            std::cout << key << ": " << value << std::endl;
+        }
+    }
 }
 
 int main(void) {
@@ -105,6 +165,7 @@ int main(void) {
     Client(&send_format_str);
     SendAndRecvRequest(send_format_str, &recv_format_str);
     Server(recv_format_str);
+    ServerWithReflection(recv_format_str);
 
     return 0;
 }
