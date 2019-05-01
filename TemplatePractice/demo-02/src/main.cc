@@ -123,7 +123,7 @@ void version3() {
     const int num_int = sizeof(arr_int)/sizeof(int);
     const int num_double = sizeof(arr_double)/sizeof(double);
 
-    int sum_int = iter_sum3<int*>(arr_int, arr_int + num_int);
+    int sum_int = iter_sum3(arr_int, arr_int + num_int);
     double sum_double = iter_sum3<double*>(arr_double, arr_double + num_double);
 
     std::cout << "sum_int: " << sum_int << std::endl;
@@ -132,8 +132,8 @@ void version3() {
     std::vector<int> vec_int(arr_int, arr_int + num_int);
     std::vector<double> vec_double(arr_double, arr_double+num_double);
 
-    sum_int = iter_sum1<std::vector<int>::iterator>(vec_int.begin(), vec_int.end());
-    sum_double = iter_sum1<std::vector<double>::iterator>(vec_double.begin(), vec_double.end());
+    sum_int = iter_sum3(vec_int.begin(), vec_int.end());
+    sum_double = iter_sum3<std::vector<double>::iterator>(vec_double.begin(), vec_double.end());
 
     std::cout << "sum_int: " << sum_int << std::endl;
     std::cout << "sum_double: " << sum_double << std::endl;
