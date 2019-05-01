@@ -122,6 +122,14 @@ void ServerWithReflection(const std::string& data) {
     std::cout << "lua_id: " << lua_id << std::endl;
 
     const qqnews::KBUserInfo& user_info = luanewsinfo.user_info();
+    const ::google::protobuf::Descriptor* pd = user_info.GetDescriptor();
+    std::cout << "----------------------------" << std::endl;
+    if (pd->FindFieldByName("cat_profile")) {
+        std::cout << "cat_profile is a field" << std::endl;
+    }else {
+        std::cout << "no repeated field" << std::endl;
+    }
+    std::cout << "----------------------------" << std::endl;
     const int cat_profile_sz = user_info.cat_profile_size();
     for(int i = 0; i < cat_profile_sz; ++i) {
         const qqnews::CatProfile& cat_profile = user_info.cat_profile(i);
