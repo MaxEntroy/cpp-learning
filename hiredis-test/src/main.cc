@@ -18,7 +18,7 @@ void RedisTest(const std::string& ip, uint32_t port, const std::string& pwd) {
 
     const std::string space = " ";
     const std::string auth = "auth" + space + pwd;
-    const std::string key1 = "101";
+    const std::string key1 = "105";
     const std::string key2 = "102";
     const std::string cmd = "mget" + space + key1 + space + key2;
     std::cout  << "cmd:"<< cmd << std::endl;
@@ -47,7 +47,18 @@ void RedisTest(const std::string& ip, uint32_t port, const std::string& pwd) {
     else {
         int sz = preply->elements;
         for(int i = 0; i < sz; ++i) {
-            std::cout << preply->element[i]->str << std::endl;
+            redisReply* pchild_reply = preply->element[i];
+            if(!pchild_reply) {
+                std::cerr << "redisReply error" << std::endl;
+                redisFree(predis);
+                return;
+            }
+            else if(pchild_reply->type != REDIS_REPLY_STRING) {
+                std::cerr << "unexpected type: " << preply->type << std::endl;
+            }
+            else{
+                std::cout << pchild_reply->str << std::endl;
+            }
         }
     }
     freeReplyObject(preply);
