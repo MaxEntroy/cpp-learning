@@ -4,6 +4,8 @@
 
 // c-style
 // function pointer
+// 存在类型安全问题
+// 指针类型转换导致类型安全问题
 typedef void (*CallbackFunc) (const std::string&);
 void f_callback(CallbackFunc caller, const std::string& mes) {
     caller(mes);
