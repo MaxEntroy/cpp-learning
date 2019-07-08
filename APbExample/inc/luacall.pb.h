@@ -173,18 +173,28 @@ class LuaNewsInfo : public ::google::protobuf::Message /* @@protoc_insertion_poi
   ::google::protobuf::uint32 lua_id() const;
   void set_lua_id(::google::protobuf::uint32 value);
 
+  // optional uint32 test_field = 3;
+  bool has_test_field() const;
+  void clear_test_field();
+  static const int kTestFieldFieldNumber = 3;
+  ::google::protobuf::uint32 test_field() const;
+  void set_test_field(::google::protobuf::uint32 value);
+
   // @@protoc_insertion_point(class_scope:qqnews.LuaNewsInfo)
  private:
   void set_has_lua_id();
   void clear_has_lua_id();
   void set_has_user_info();
   void clear_has_user_info();
+  void set_has_test_field();
+  void clear_has_test_field();
 
   ::google::protobuf::internal::InternalMetadataWithArena _internal_metadata_;
   ::google::protobuf::internal::HasBits<1> _has_bits_;
   mutable ::google::protobuf::internal::CachedSize _cached_size_;
   ::qqnews::KBUserInfo* user_info_;
   ::google::protobuf::uint32 lua_id_;
+  ::google::protobuf::uint32 test_field_;
   friend struct ::protobuf_luacall_2eproto::TableStruct;
 };
 // ===================================================================
@@ -274,6 +284,30 @@ inline void LuaNewsInfo::set_allocated_user_info(::qqnews::KBUserInfo* user_info
   }
   user_info_ = user_info;
   // @@protoc_insertion_point(field_set_allocated:qqnews.LuaNewsInfo.user_info)
+}
+
+// optional uint32 test_field = 3;
+inline bool LuaNewsInfo::has_test_field() const {
+  return (_has_bits_[0] & 0x00000004u) != 0;
+}
+inline void LuaNewsInfo::set_has_test_field() {
+  _has_bits_[0] |= 0x00000004u;
+}
+inline void LuaNewsInfo::clear_has_test_field() {
+  _has_bits_[0] &= ~0x00000004u;
+}
+inline void LuaNewsInfo::clear_test_field() {
+  test_field_ = 0u;
+  clear_has_test_field();
+}
+inline ::google::protobuf::uint32 LuaNewsInfo::test_field() const {
+  // @@protoc_insertion_point(field_get:qqnews.LuaNewsInfo.test_field)
+  return test_field_;
+}
+inline void LuaNewsInfo::set_test_field(::google::protobuf::uint32 value) {
+  set_has_test_field();
+  test_field_ = value;
+  // @@protoc_insertion_point(field_set:qqnews.LuaNewsInfo.test_field)
 }
 
 #ifdef __GNUC__

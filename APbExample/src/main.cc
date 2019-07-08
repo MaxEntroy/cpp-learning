@@ -4,6 +4,7 @@
 
 void Client(std::string* output) {
     std::cout << "Client called." << std::endl;
+    std::string sep_line(32, '-');
 
     qqnews::LuaNewsInfo luanewsinfo;
 
@@ -11,17 +12,22 @@ void Client(std::string* output) {
     std::cout << "lua_id: " << lua_id << std::endl;
     luanewsinfo.set_lua_id(lua_id);
 
+    int test_field = 32;
+    std::cout << "test_field: " << test_field << std::endl;
+    //luanewsinfo.set_test_field(test_field);
+
     qqnews::KBUserInfo* user_info = luanewsinfo.mutable_user_info();
 
+    std::cout << sep_line << std::endl;
     qqnews::CatProfile* cat_profile1 = user_info->add_cat_profile();
 
-    std::string type("");
-    std::cout << "type: " << type << std::endl;
-    cat_profile1->set_type(type);
+    std::string type("realtime_profile");
+    //std::cout << "type: " << type << std::endl;
+    //cat_profile1->set_type(type);
 
     std::string weight("0.3");
-    std::cout << "weight: " << weight << std::endl;
-    cat_profile1->set_weight(weight);
+    //std::cout << "weight: " << weight << std::endl;
+    //cat_profile1->set_weight(weight);
 
     std::string lv1("sports");
     std::cout << "lv1: " << lv1 << std::endl;
@@ -39,9 +45,10 @@ void Client(std::string* output) {
     std::cout << "lv4: " << lv4 << std::endl;
     cat_profile1->set_lv4(lv4);
 
+    std::cout << sep_line << std::endl;
     qqnews::CatProfile* cat_profile2 = user_info->add_cat_profile();
 
-    type = "";
+    type = "longtime_profile";
     std::cout << "type: " << type << std::endl;
     cat_profile2->set_type(type);
 
@@ -66,15 +73,16 @@ void Client(std::string* output) {
     cat_profile2->set_lv4(lv4);
 
     luanewsinfo.SerializeToString(output);
+    std::cout << sep_line << std::endl;
 }
 
 void SendAndRecvRequest(const std::string& send_format_str, std::string* recv_format_str) {
     *recv_format_str = send_format_str;
-    std::cout << "-------------------" << std::endl;
 }
 
 void Server(const std::string& data) {
     std::cout << "Server called." << std::endl;
+    std::string sep_line(32, '-');
 
     qqnews::LuaNewsInfo luanewsinfo;
     luanewsinfo.ParseFromString(data);
@@ -83,15 +91,22 @@ void Server(const std::string& data) {
     lua_id = luanewsinfo.lua_id();
     std::cout << "lua_id: " << lua_id << std::endl;
 
+    int test_field = -1;
+    test_field = luanewsinfo.test_field();
+    std::cout << "test_field: " << test_field << std::endl;
+    std::cout << sep_line << std::endl;
+
     const qqnews::KBUserInfo& user_info = luanewsinfo.user_info();
     const int cat_profile_sz = user_info.cat_profile_size();
     for(int i = 0; i < cat_profile_sz; ++i) {
         const qqnews::CatProfile& cat_profile = user_info.cat_profile(i);
 
         const std::string& type = cat_profile.type();
+        if(type.empty()) {std::cout << "empty type" << std::endl;}
         std::cout << "type: " << type << std::endl;
 
         const std::string& weight = cat_profile.weight();
+        if(weight.empty()) {std::cout << "empty weight" << std::endl;}
         std::cout << "weight: " << weight << std::endl;
 
         const std::string& lv1 = cat_profile.lv1();
@@ -105,12 +120,15 @@ void Server(const std::string& data) {
 
         const std::string& lv4 = cat_profile.lv4();
         std::cout << "lv4: " << lv4 << std::endl;
+
+        std::cout << sep_line << std::endl;
     }
 
 }
 
 void ServerWithReflection(const std::string& data) {
     std::cout << "ServerWithReflection called." << std::endl;
+    std::string sep_line(32, '-');
 
     qqnews::LuaNewsInfo luanewsinfo;
     luanewsinfo.ParseFromString(data);
@@ -121,15 +139,21 @@ void ServerWithReflection(const std::string& data) {
     lua_id = luanewsinfo.lua_id();
     std::cout << "lua_id: " << lua_id << std::endl;
 
+    int test_field = -1;
+    test_field = luanewsinfo.test_field();
+    std::cout << "test_field: " << test_field << std::endl;
+    std::cout << sep_line << std::endl;
+
     const qqnews::KBUserInfo& user_info = luanewsinfo.user_info();
     const ::google::protobuf::Descriptor* pd = user_info.GetDescriptor();
-    std::cout << "----------------------------" << std::endl;
     if (pd->FindFieldByName("cat_profile")) {
         std::cout << "cat_profile is a field" << std::endl;
     }else {
         std::cout << "no repeated field" << std::endl;
+        return;
     }
-    std::cout << "----------------------------" << std::endl;
+    std::cout << sep_line << std::endl;
+
     const int cat_profile_sz = user_info.cat_profile_size();
     for(int i = 0; i < cat_profile_sz; ++i) {
         const qqnews::CatProfile& cat_profile = user_info.cat_profile(i);
@@ -162,6 +186,7 @@ void ServerWithReflection(const std::string& data) {
 
             std::cout << key << ": " << value << std::endl;
         }
+        std::cout << sep_line << std::endl;
     }
 }
 

@@ -59,11 +59,13 @@ const ::google::protobuf::uint32 TableStruct::offsets[] GOOGLE_PROTOBUF_ATTRIBUT
   ~0u,  // no _weak_field_map_
   GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(::qqnews::LuaNewsInfo, lua_id_),
   GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(::qqnews::LuaNewsInfo, user_info_),
+  GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(::qqnews::LuaNewsInfo, test_field_),
   1,
   0,
+  2,
 };
 static const ::google::protobuf::internal::MigrationSchema schemas[] GOOGLE_PROTOBUF_ATTRIBUTE_SECTION_VARIABLE(protodesc_cold) = {
-  { 0, 7, sizeof(::qqnews::LuaNewsInfo)},
+  { 0, 8, sizeof(::qqnews::LuaNewsInfo)},
 };
 
 static ::google::protobuf::Message const * const file_default_instances[] = {
@@ -91,12 +93,13 @@ void protobuf_RegisterTypes(const ::std::string&) {
 void AddDescriptorsImpl() {
   InitDefaults();
   static const char descriptor[] GOOGLE_PROTOBUF_ATTRIBUTE_SECTION_VARIABLE(protodesc_cold) = {
-      "\n\rluacall.proto\022\006qqnews\032\rprofile.proto\"D"
+      "\n\rluacall.proto\022\006qqnews\032\rprofile.proto\"X"
       "\n\013LuaNewsInfo\022\016\n\006lua_id\030\001 \002(\r\022%\n\tuser_in"
-      "fo\030\002 \001(\0132\022.qqnews.KBUserInfo"
+      "fo\030\002 \001(\0132\022.qqnews.KBUserInfo\022\022\n\ntest_fie"
+      "ld\030\003 \001(\r"
   };
   ::google::protobuf::DescriptorPool::InternalAddGeneratedFile(
-      descriptor, 108);
+      descriptor, 128);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "luacall.proto", &protobuf_RegisterTypes);
   ::protobuf_profile_2eproto::AddDescriptors();
@@ -128,6 +131,7 @@ void LuaNewsInfo::clear_user_info() {
 #if !defined(_MSC_VER) || _MSC_VER >= 1900
 const int LuaNewsInfo::kLuaIdFieldNumber;
 const int LuaNewsInfo::kUserInfoFieldNumber;
+const int LuaNewsInfo::kTestFieldFieldNumber;
 #endif  // !defined(_MSC_VER) || _MSC_VER >= 1900
 
 LuaNewsInfo::LuaNewsInfo()
@@ -147,14 +151,16 @@ LuaNewsInfo::LuaNewsInfo(const LuaNewsInfo& from)
   } else {
     user_info_ = NULL;
   }
-  lua_id_ = from.lua_id_;
+  ::memcpy(&lua_id_, &from.lua_id_,
+    static_cast<size_t>(reinterpret_cast<char*>(&test_field_) -
+    reinterpret_cast<char*>(&lua_id_)) + sizeof(test_field_));
   // @@protoc_insertion_point(copy_constructor:qqnews.LuaNewsInfo)
 }
 
 void LuaNewsInfo::SharedCtor() {
   ::memset(&user_info_, 0, static_cast<size_t>(
-      reinterpret_cast<char*>(&lua_id_) -
-      reinterpret_cast<char*>(&user_info_)) + sizeof(lua_id_));
+      reinterpret_cast<char*>(&test_field_) -
+      reinterpret_cast<char*>(&user_info_)) + sizeof(test_field_));
 }
 
 LuaNewsInfo::~LuaNewsInfo() {
@@ -191,7 +197,11 @@ void LuaNewsInfo::Clear() {
     GOOGLE_DCHECK(user_info_ != NULL);
     user_info_->Clear();
   }
-  lua_id_ = 0u;
+  if (cached_has_bits & 6u) {
+    ::memset(&lua_id_, 0, static_cast<size_t>(
+        reinterpret_cast<char*>(&test_field_) -
+        reinterpret_cast<char*>(&lua_id_)) + sizeof(test_field_));
+  }
   _has_bits_.Clear();
   _internal_metadata_.Clear();
 }
@@ -226,6 +236,20 @@ bool LuaNewsInfo::MergePartialFromCodedStream(
             static_cast< ::google::protobuf::uint8>(18u /* 18 & 0xFF */)) {
           DO_(::google::protobuf::internal::WireFormatLite::ReadMessage(
                input, mutable_user_info()));
+        } else {
+          goto handle_unusual;
+        }
+        break;
+      }
+
+      // optional uint32 test_field = 3;
+      case 3: {
+        if (static_cast< ::google::protobuf::uint8>(tag) ==
+            static_cast< ::google::protobuf::uint8>(24u /* 24 & 0xFF */)) {
+          set_has_test_field();
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::uint32, ::google::protobuf::internal::WireFormatLite::TYPE_UINT32>(
+                 input, &test_field_)));
         } else {
           goto handle_unusual;
         }
@@ -270,6 +294,11 @@ void LuaNewsInfo::SerializeWithCachedSizes(
       2, this->_internal_user_info(), output);
   }
 
+  // optional uint32 test_field = 3;
+  if (cached_has_bits & 0x00000004u) {
+    ::google::protobuf::internal::WireFormatLite::WriteUInt32(3, this->test_field(), output);
+  }
+
   if (_internal_metadata_.have_unknown_fields()) {
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         _internal_metadata_.unknown_fields(), output);
@@ -295,6 +324,11 @@ void LuaNewsInfo::SerializeWithCachedSizes(
     target = ::google::protobuf::internal::WireFormatLite::
       InternalWriteMessageToArray(
         2, this->_internal_user_info(), deterministic, target);
+  }
+
+  // optional uint32 test_field = 3;
+  if (cached_has_bits & 0x00000004u) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(3, this->test_field(), target);
   }
 
   if (_internal_metadata_.have_unknown_fields()) {
@@ -327,6 +361,13 @@ size_t LuaNewsInfo::ByteSizeLong() const {
         *user_info_);
   }
 
+  // optional uint32 test_field = 3;
+  if (has_test_field()) {
+    total_size += 1 +
+      ::google::protobuf::internal::WireFormatLite::UInt32Size(
+        this->test_field());
+  }
+
   int cached_size = ::google::protobuf::internal::ToCachedSize(total_size);
   SetCachedSize(cached_size);
   return total_size;
@@ -355,12 +396,15 @@ void LuaNewsInfo::MergeFrom(const LuaNewsInfo& from) {
   (void) cached_has_bits;
 
   cached_has_bits = from._has_bits_[0];
-  if (cached_has_bits & 3u) {
+  if (cached_has_bits & 7u) {
     if (cached_has_bits & 0x00000001u) {
       mutable_user_info()->::qqnews::KBUserInfo::MergeFrom(from.user_info());
     }
     if (cached_has_bits & 0x00000002u) {
       lua_id_ = from.lua_id_;
+    }
+    if (cached_has_bits & 0x00000004u) {
+      test_field_ = from.test_field_;
     }
     _has_bits_[0] |= cached_has_bits;
   }
@@ -393,6 +437,7 @@ void LuaNewsInfo::InternalSwap(LuaNewsInfo* other) {
   using std::swap;
   swap(user_info_, other->user_info_);
   swap(lua_id_, other->lua_id_);
+  swap(test_field_, other->test_field_);
   swap(_has_bits_[0], other->_has_bits_[0]);
   _internal_metadata_.Swap(&other->_internal_metadata_);
 }
