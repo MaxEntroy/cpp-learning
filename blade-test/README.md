@@ -1,4 +1,4 @@
-#### 初次使用
+## demo-01
 - Install blade
 - Make a dir as root
 - Touch BLADE_ROOT
@@ -13,3 +13,9 @@ BLADE_ROOT所在的路径，和项目目录并列，因为会生成编译产物�
 
 参考<br>
 [Use Blade](http://km.oa.com/base/attachments/attachment_view/29633)<br>
+
+## demo-02
+确定了几个点：
+- 相对路径从BLADE_ROOT所在目录开始
+- Makefile时代的src,inc的写法，可能不适合blade
+    - 参考rerank的构建方法，其他文件构建成Lib，最后和main.cc构建成binary
