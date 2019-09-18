@@ -5,9 +5,7 @@
 以下是错误的理解，颇具代表性，保留下来
 >.so文件，elf当中属于shared object file，由于不在compile time进行linking，所以编译时不需要加入.so文件。
 但是，由于run time时需要dynamic linkikng，compile time需要进行说明
--L的作用：指定.so的寻找路径，当然ld有默认的，如果不放入默认路径，需要自己指定。-lsoname，指定run time是dynamic linking的文件
-相对路径可识别
-```
+-L的作用：指定.so的寻找路径，当然ld有默认的，如果不放入默认路径，需要自己指定。-lsoname，指定run time是dynamic linking的文件相对路径可识别
 
 之前没有发现这个问题，是因为之前的实验设置有问题，静态库和动态库在一起，所以当时的Makefile其实是.a发挥的作用。
 第二篇参考文献，说的很清楚，**动态库的链接，两个阶段缺一不可**
