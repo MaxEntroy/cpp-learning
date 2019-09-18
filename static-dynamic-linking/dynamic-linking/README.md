@@ -23,7 +23,8 @@ q:对于static linking和dynamic lingking的概念比较混淆？
 .a和.so的本质区别就是装入的时机。linking阶段要解决的一个很重要的问题就是，符号解析的问题。记住这2个点
 
 下面，我们来看，如果编译时不进行链接出现的问题
-```
+
+```c
 INC_DIR:=./inc
 SRC_DIR:=./src
 EXE_DIR:=./bin
@@ -51,7 +52,8 @@ make: *** [bin/main] 错误 1
 显然是符号解析的问题，找不到符号。
 
 那么，我们进行修改，告诉compiler,linker需要什么库，和到哪找
-```
+
+```c
 INC_DIR:=./inc
 SRC_DIR:=./src
 EXE_DIR:=./bin
@@ -78,7 +80,8 @@ kang@ubuntu:~/workspace/myspace/git-personal/cpp-learning/static-dynamic-linking
 ```
 
 参考第二篇参考文献，对于Makefile进行修改：
-```
+
+```c
 INC_DIR:=./inc
 SRC_DIR:=./src
 EXE_DIR:=./bin
