@@ -6,10 +6,11 @@ TARGET:=$(EXE_DIR)/main
 OBJS:= $(wildcard $(SRC_DIR)/*.cc)
 
 CC:=g++
-CFLAGS:=-g -Wall -std=c++11 -Lthirdparty/tmath/lib -ltmath
+CFLAGS:=-g -Wall -std=c++11
+LDFLAGS:= -L./thirdparty/tmath/lib -ltmath
 
 $(TARGET):$(OBJS)
-	$(CC) -o $@ $(OBJS) $(CFLAGS)
+	$(CC) -o $@ $(OBJS) $(CFLAGS) $(LDFLAGS)
 
 clean:
 	rm -rf $(TARGET)

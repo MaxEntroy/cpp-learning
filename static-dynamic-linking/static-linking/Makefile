@@ -3,7 +3,7 @@ SRC_DIR:=./src
 EXE_DIR:=./bin
 
 TARGET:=$(EXE_DIR)/main
-OBJS:= $(wildcard $(SRC_DIR)/*.cc) thirdparty/tmath/lib/libtmath.a
+OBJS:= $(wildcard $(SRC_DIR)/*.cc) ./thirdparty/tmath/lib/libtmath.a
 
 CC:=g++
 CFLAGS:=-g -Wall -std=c++11
