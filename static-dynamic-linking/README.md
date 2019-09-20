@@ -23,10 +23,13 @@
 所以，我们可以暂时总结道，编译/汇编阶段，至少要找到变量的声明（这也是头文件的作用，头文件没有定义，只有声明，所以要放在编译阶段）。链接阶段则是要确定的找到声明变量/函数实际的定义。
 
 那么，如下四个环境变量的作用，就很清晰了：
->export C_INCLUDE_PATH=$C_INCLUDE_PATH:/usr/local/thirdparty/lj-2.0.5/include                                                                                                    export CPLUS_INCLUDE_PATH=$CPLUS_INCLUDE_PATH:/usr/local/thirdparty/lj-2.0.5/include
+
+```c
+export C_INCLUDE_PATH=$C_INCLUDE_PATH:/usr/local/thirdparty/lj-2.0.5/include                                                                                                    export CPLUS_INCLUDE_PATH=$CPLUS_INCLUDE_PATH:/usr/local/thirdparty/lj-2.0.5/include
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/thirdparty/lj-2.0.5/lib
 export LIBRARY_PATH=$LIBRARY_PATH:/usr/local/thirdparty/lj-2.0.5/lib
->
+```
+
 >前2个是在编译/汇编阶段，指定头文件去哪里找，是为了解决变量/函数的声明问题。
 >LIBRARY_PATH是在linking阶段，指定.so的路径，找到只声明但未定义变量/函数的实际定义
 >注意，上述3个变量，均只是在compile time发挥作用
