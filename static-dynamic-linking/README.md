@@ -25,7 +25,8 @@
 那么，如下四个环境变量的作用，就很清晰了：
 
 ```c
-export C_INCLUDE_PATH=$C_INCLUDE_PATH:/usr/local/thirdparty/lj-2.0.5/include                                                                                                    export CPLUS_INCLUDE_PATH=$CPLUS_INCLUDE_PATH:/usr/local/thirdparty/lj-2.0.5/include
+export C_INCLUDE_PATH=$C_INCLUDE_PATH:/usr/local/thirdparty/lj-2.0.5/include
+export CPLUS_INCLUDE_PATH=$CPLUS_INCLUDE_PATH:/usr/local/thirdparty/lj-2.0.5/include
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/thirdparty/lj-2.0.5/lib
 export LIBRARY_PATH=$LIBRARY_PATH:/usr/local/thirdparty/lj-2.0.5/lib
 ```
