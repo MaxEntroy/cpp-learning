@@ -4,6 +4,7 @@
 
 .a文件，本质上和.o文件都属于elf当中的可重定位文件，所以，.a写到objs处即可
 相对路径可识别
+
 ```
 INC_DIR:=./inc
 SRC_DIR:=./src
@@ -20,11 +21,13 @@ $(TARGET):$(OBJS)
 
 clean:
 	rm -rf $(TARGET)
+```
 
 这是一种形式，之前对这里的理解不是很清晰。既然是库，还是要靠linker进行链接。
 这是我的一个理解，并没有验证过。
 
 那么自然有下面这种写法，
+
 ```
 INC_DIR:=./inc
 SRC_DIR:=./src
