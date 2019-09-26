@@ -1,7 +1,7 @@
 ## lua-call-c
 
 #### 背景
-这一小节，主要解决的是,c->lua，然后lua->.so的问题。主程序以及.so全部由c实现.
+这一小节，主要解决的是,c->lua，lua->.so的问题。主程序以及.so全部由c实现.
 ```
 .
 ├── lib
@@ -15,6 +15,10 @@
     ├── liblua.so
     └── Makefile
 ```
+
+```lib```存放的是测试.so的代码，具体的编译命令如下```gcc -fPIC -shared -o other.so other_lib.cc```
+```thirdparty```存放的是lua的动态库，版本是lua-5.3.0，Makefile也是修改后的版本，编译命令如下```make linux```
+```main.c/test.lua```主函数以及被调lua代码
 
 #### 问题解决
 对于这一问题的解决，主要经历了3个解决，
