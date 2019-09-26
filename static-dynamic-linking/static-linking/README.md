@@ -56,5 +56,7 @@ clean:
 
 当然，静态库的好处是，compile time把.a打入binary，run time不再受影响。所以，只要编译通过，不会出现执行时找不到符号的问题。
 
+
 参考<br>
 [浅析静态库链接原理](http://codemacro.com/2014/09/15/inside-static-library/)<br>
+[GNU的ar，ranlib和nm](https://blog.csdn.net/yuntongsf/article/details/6284517)
