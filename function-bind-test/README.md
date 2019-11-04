@@ -1,0 +1,10 @@
+q:std::function有什么用？
+>Class template std::function is a general-purpose polymorphic function wrapper.
+
+q:如何理解？
+>我理解是对于函数作为一等公民的支持，cpp本身不支持，所以通过一个function wrapper来实现这种语义。
+
+
+参考
+[C++11 中的std::function和std::bind](https://www.jianshu.com/p/f191e88dcc80)
+[std::function](https://en.cppreference.com/w/cpp/utility/functional/function)
