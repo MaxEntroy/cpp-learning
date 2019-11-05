@@ -5,7 +5,7 @@ q:如何理解？
 >我理解是对于函数作为一等公民的支持，cpp本身不支持，所以通过一个function wrapper来实现这种语义。
 
 q:函数指针类型不安全？
-还有很重要一点在于，std::function是类型安全的，但是诸如函数指针这样的可调用对象，并不是类型安全的。
+>还有很重要一点在于，std::function是类型安全的，但是诸如函数指针这样的可调用对象，并不是类型安全的。
 对于函数指针，定义int(*)(int, int)，如果我们实际传递int(*)(int)，也是可以的，fn不过是一个指向函数的指针，我们无法判断这个指针实际指向什么，像参数和返回类型等无从知晓。
 
 ```cpp
@@ -59,7 +59,7 @@ ps:为什么int,float,double类型不一致，也可以强转。因为int,float,
 ```
 
 
-q:std::find有什么用？
+q:std::bind有什么用？
 >The function template bind generates a forwarding call wrapper for f. 
 Calling this wrapper is equivalent to invoking f with some of its arguments bound to args.
 
@@ -70,7 +70,13 @@ q:如何理解？
 - 将可调用对象和其参数绑定成一个functor
 - 只绑定部分参数，减少可调用对象传入的参数。
 
-参考
-[C++11 中的std::function和std::bind](https://www.jianshu.com/p/f191e88dcc80)
-[std::function](https://en.cppreference.com/w/cpp/utility/functional/function)
-[C/C++函数指针参数不匹配问题](https://blog.csdn.net/oktears/article/details/39452341)
+绑定成员函数时，需要注意
+- 第一个参数表示对象的成员函数的指针，第二个参数表示对象的地址
+- 必须显示的指定&Foo::get_data，因为编译器不会将对象的成员函数隐式转换成函数指针，所以必须在Foo::get_data前添加&
+- 使用对象成员函数的指针时，必须要知道该指针属于哪个对象，因此第二个参数为对象的地址 &foo
+
+
+参考<br>
+[C++11 中的std::function和std::bind](https://www.jianshu.com/p/f191e88dcc80)<br>
+[std::function](https://en.cppreference.com/w/cpp/utility/functional/function)<br>
+[C/C++函数指针参数不匹配问题](https://blog.csdn.net/oktears/article/details/39452341)<br>
