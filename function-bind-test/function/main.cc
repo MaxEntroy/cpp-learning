@@ -4,7 +4,6 @@
 // callable object - function
 int add(int a, int b) {return a + b;}
 
-
 // callable object - lambda expression
 auto sub = [](int a, int b){return a - b;};
 
