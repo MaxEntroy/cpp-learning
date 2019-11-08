@@ -75,6 +75,29 @@ q:如何理解？
 - 必须显示的指定&Foo::get_data，因为编译器不会将对象的成员函数隐式转换成函数指针，所以必须在Foo::get_data前添加&
 - 使用对象成员函数的指针时，必须要知道该指针属于哪个对象，因此第二个参数为对象的地址 &foo
 
+q:对于下面的这个case, std::bind成员函数时，生成的参数是什么样？
+```cpp
+class Student {
+public:
+    Student(): age_(0) {}
+    Student(const std::string& name, int age) : name_(name), age_(age) {}
+
+    void show(int year) const {
+        std::cout << "year: " << year << std::endl;
+        std::cout << "name: " << name_ << ", age: " << age_ << std::endl;
+    }
+
+private:
+    std::string name_;
+    int age_;
+};
+
+auto show_student = std::bind(&Student::show, std::placeholders::_1, 2019);
+// std::function<void(Student)> f
+// std::function<void(const Student&)>
+// std::function<void(Student&)>
+// 上面哪一个是std::bind生成的最终模板？
+```
 
 参考<br>
 [C++11 中的std::function和std::bind](https://www.jianshu.com/p/f191e88dcc80)<br>

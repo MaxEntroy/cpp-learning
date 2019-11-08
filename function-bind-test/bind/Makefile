@@ -1,5 +1,5 @@
 TARGET:=main
-OBJS:=main.cc
+OBJS:=demo-02.cc
 
 CXXFLAGS:=-g -Wall -std=c++11
 
