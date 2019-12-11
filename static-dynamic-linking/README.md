@@ -38,10 +38,10 @@ export LIBRARY_PATH=$LIBRARY_PATH:/usr/local/thirdparty/lj-2.0.5/lib
 >
 >LIBRARY_PATH指定的路径只在编译时有效，编译出来的可执行文件并不知道.so的路径，所以在run time时还需要指定。
 
-总结：
-1.compile and run time是需要关注的两个阶段
-2.compile time分为四个子阶段，但整体上可以看为两个阶段，编译/汇编，链接
-3..so的linking比较特殊，需要在compile time/linking阶段指定路径，run time指定路径
+总结：<br>
+1.compile and run time是需要关注的两个阶段<br>
+2.compile time分为四个子阶段，但整体上可以看为两个阶段，编译/汇编，链接<br>
+3..so的linking比较特殊，需要在compile time/linking阶段指定路径，run time指定路径<br>
 
 参考<br>
 [高级语言的编译：链接及装载过程介绍](https://tech.meituan.com/2015/01/22/linker.html?from=timeline&isappinstalled=0)<br>
