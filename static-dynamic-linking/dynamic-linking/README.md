@@ -113,8 +113,10 @@ clean:
     - stage1: preprocessing, compilation, assembly
     - stage2: linking
 - run time
+
 其中，stage1和stage2是我自己划分的阶段，根据是是否需要找到变量/函数定义。stage1只要找到符号定义即可，stage2则要找到定义。<br>
-对于linking阶段，需要找到函数/变量的定义，但是对于定义这一部分代码，我们根据它是否装入最后的可执行程序文件，又分成static linking and dynamic linking.前者是在compile time就把库装入可执行程序文件，后者是在run time才把库装入可执行程序文件
+对于linking阶段，需要找到函数/变量的定义，这个是必须的，不管static linking还是dynamic linking都需要在compile time找到函数/变量定义.<br>
+但是对于定义这一部分代码，我们根据它装入最后的可执行程序文件的时机，又分成static linking and dynamic linking.前者是在compile time就把库装入可执行程序文件，后者是在run time才把库装入可执行程序文件
 
 参考<br>
 [C++静态库与动态库](https://www.cnblogs.com/skynet/p/3372855.html)<br>
