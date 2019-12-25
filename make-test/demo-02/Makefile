@@ -42,7 +42,7 @@ echo:
 clean:
 	$(RM) $(MAIN_A) $(BASE_O) $(MAIN_T) $(MAIN_O)
 
-.PHONY: echo clean
+.PHONY: a t echo clean
 
 main.o: main.c foo.h
 foo.o: foo.c
