@@ -18,7 +18,6 @@ MAIN_T= main
 MAIN_O= main.o
 
 # Targets start here
-
 a: $(MAIN_A)
 
 t: $(MAIN_T)
