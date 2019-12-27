@@ -49,4 +49,4 @@ c89:
 .PHONY: a t echo clean
 
 main.o: main.c foo.h
-foo.o: foo.c
+foo.o: foo.c foo.h
