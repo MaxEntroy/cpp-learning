@@ -41,6 +41,11 @@ echo:
 clean:
 	$(RM) $(MAIN_A) $(BASE_O) $(MAIN_T) $(MAIN_O)
 
+# Convenience targets
+T= t
+c89:
+	$(MAKE) $(T) CC="gcc -std=c89"
+
 .PHONY: a t echo clean
 
 main.o: main.c foo.h
