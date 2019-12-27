@@ -126,3 +126,8 @@ q:这个demo学到那些技巧？
 - demo-02
 
 这个demo给出了一个标准的makefile写法，单target,没有多余的嵌套逻辑.
+层次逻辑如下：
+- 第一层:.c->.o
+- 第二层:.o集合定义 .a定义 target定义
+- 第三层:target objs规则
+
