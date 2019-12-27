@@ -1,45 +1,40 @@
+# Makefile for building myio
 CC= gcc -std=gnu99
-CFLAGS= -Wall -Wextra $(SYSCFLAGS) $(MYCFLAGS)
-LDFLAGS= $(SYSLDFLAGS) $(MYLDFLAGS)
-LIBS= $(SYSLIBS) $(MYLIBS)
+CFLAGS= -Wall -Wextra
+LDFLAGS= $(MYLDFLAGS)
+LIBS= $(MYLIBS)
+
+MYLDFLAGS=
+MYLIBS=
 
 AR= ar rcu
 RANLIB= ranlib
 RM= rm -f
 
-SYSCFLAGS=
-SYSLDFLAGS=
-SYSLIBS=
 
-MYCFLAGS=
-MYLDFLAGS=
-MYLIBS=
+MYIO_A= libmyio.a
+BASE_O=  numberio.o strio.o
 
-ALL_A= libmyio.a
-ALL_O= numberio.o strio.o
+# Target starts here.
+a: $(MYIO_A)
 
-# Targets start here
-$(ALL_A): $(ALL_O) 
-	$(AR) $@ $(ALL_O)
+$(MYIO_A): $(BASE_O)
+	$(AR) $@ $(BASE_O)
 	$(RANLIB) $@
-
-o: $(ALL_O)
-
-a: $(ALL_A)
-
-clean:
-	$(RM) $(ALL_A) $(ALL_O)
 
 echo:
 	@echo "CC= $(CC)"
 	@echo "CFLAGS= $(CFLAGS)"
-	@echo "LDFLAGS= $(SYSLDFLAGS)"
+	@echo "LDFLAGS= $(LDFLAGS)"
 	@echo "LIBS= $(LIBS)"
 	@echo "AR= $(AR)"
 	@echo "RANLIB= $(RANLIB)"
 	@echo "RM= $(RM)"
 
-.PHONY: o a clean echo
+clean:
+	$(RM) $(MYIO_A) $(BASE_O)
 
-numberio.o: numberio.c
-strio.o: strio.c
+.PHONY: a echo clean
+
+numberio.o: numberio.c numberio.h
+strio.o: strio.c strio.h

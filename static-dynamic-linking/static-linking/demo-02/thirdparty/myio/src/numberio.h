@@ -1,5 +1,5 @@
-#ifndef NUMBERIO_H
-#define NUMBERIO_H
+#ifndef NUMBERIO_H_
+#define NUMBERIO_H_
 
 void printint(int);
 void printfloat(float);
