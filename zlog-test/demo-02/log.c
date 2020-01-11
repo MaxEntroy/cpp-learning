@@ -22,7 +22,7 @@ pzlog LOG_INIT(const char* conf, const char* cat) {
 
 void LOG(pzlog c, LogLevel level, const char* log_msg) {
   switch(level) {
-    case DEBUG  : zlog_info(c, "%s", log_msg);break;
+    case DEBUG  : zlog_debug(c, "%s", log_msg);break;
     case INFO   : zlog_info(c, "%s", log_msg); break;
     case NOTICE : zlog_notice(c, "%s", log_msg); break;
     case WARN   : zlog_warn(c, "%s", log_msg); break;
@@ -32,6 +32,6 @@ void LOG(pzlog c, LogLevel level, const char* log_msg) {
   }
 }
 
-void LIG_FINI() {
+void LOG_FINI() {
   zlog_fini();
 }
