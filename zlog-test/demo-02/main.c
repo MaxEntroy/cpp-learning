@@ -3,7 +3,7 @@
 void test_zlog() {
   pzlog c = LOG_INIT("test_hello.conf", "my_cat");
 
-  LOG(c, INFO, "hello, zlog");
+  LOG(c, INFO, "%s", "hello, zlog");
 
   LOG_FINI();
 }
