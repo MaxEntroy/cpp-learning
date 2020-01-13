@@ -20,18 +20,6 @@ pzlog LOG_INIT(const char* conf, const char* cat) {
   return c;
 }
 
-void LOG(pzlog c, LogLevel level, const char* log_format, const char* log_msg) {
-  switch(level) {
-    case DEBUG  : zlog_debug(c, log_format, log_msg);break;
-    case INFO   : zlog_info(c, log_format, log_msg); break;
-    case NOTICE : zlog_notice(c, log_format, log_msg); break;
-    case WARN   : zlog_warn(c, log_format, log_msg); break;
-    case ERROR  : zlog_error(c, log_format, log_msg); break;
-    case FATAL  : zlog_fatal(c, log_format, log_msg); break;
-    default     : zlog_error(c, "Undefined log level."); break;
-  }
-}
-
 void LOG_FINI() {
   zlog_fini();
 }

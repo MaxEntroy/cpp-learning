@@ -1,4 +1,4 @@
-CC= gcc -std=gnu99
+CC= gcc -std=c99
 CFLAGS= -Wall -Wextra $(MYCFLAGS)
 LDFLAGS= $(MYLDFLAGS)
 LIBS= $(MYLIBS)
