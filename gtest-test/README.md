@@ -64,3 +64,28 @@ TEST(AddTest, HandleNegative) {
 [gtest快速上手](https://segmentfault.com/a/1190000002454946)
 
 ## demo-02
+
+本小节，对于gtest进行系统的学习
+
+Basic Concepts
+- When using googletest, you start by writing assertions, which are statements that check whether a condition is true.An assertion's result can be:
+  - success
+  - nonfatal failure
+  - fatal failure
+- Tests use assertions to verify the tested code's behavior.
+- A test suite contains one or many tests
+  - You should group your tests into test suites
+  - When multiple tests in a test suite need to share common objects and subroutines, you can put them into a test fixture class
+- A test program can contain multiple test suites.
+
+
+Assertions
+- ASSERT_* versions generate fatal failures when they fail, and abort the current function
+- EXPECT_* versions generate nonfatal failures, which don't abort the current function.
+- Since a failed ASSERT_* returns from the current function immediately, possibly skipping clean-up code that comes after it, it may cause a space leak. 
+- Anything that can be streamed to an ostream can be streamed to an assertion macro
+
+Test Fixtures: Using the Same Data Configuration for Multiple Tests {#same-data-multiple-tests}
+- googletest does not reuse the same test fixture for multiple tests
+- Any changes one test makes to the fixture do not affect other tests.
+虽说，Test Fixtures的语义是提供不同测例之间的共享数据，但是本质上来说，只是为测例提供一些preconditions，各个测例之间还是相互不影响。
