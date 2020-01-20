@@ -89,3 +89,120 @@ Test Fixtures: Using the Same Data Configuration for Multiple Tests {#same-data-
 - googletest does not reuse the same test fixture for multiple tests
 - Any changes one test makes to the fixture do not affect other tests.
 虽说，Test Fixtures的语义是提供不同测例之间的共享数据，但是本质上来说，只是为测例提供一些preconditions，各个测例之间还是相互不影响。
+
+q:Text Fixtures到底有什么用？
+>我理解，还是对有状态函数的测试，其中的状态可以通过上下文进行测试。
+
+最典型的例子是对于类的测试，显然类对象是有状态的。对于状态的设置，可以通过上下文的一些函数来进行控制
+```cpp
+#ifndef QUE_H_
+#define QUE_H_
+
+#include <stdio.h>
+
+#include <queue>
+
+template<class T>
+class Que {
+ public:
+  Que() {}
+
+  // Inserts a new element at the end of the queue.
+  void Enque(const T& e);
+
+  // Remove the "oldest" element from the queue and return it.
+  // Return 0 if the queue is empty. Otherwise, return 1.
+  int Deque(T* e);
+
+  // Return the size of the queue.
+  size_t size() const;
+
+ private:
+  std::queue<T> q_;
+
+};
+
+template<class T>
+void Que<T>::Enque(const T& e) {
+  q_.push(e);
+}
+
+template<class T>
+int Que<T>::Deque(T* e) {
+  if(q_.empty())
+    return 0;
+
+  *e = q_.front();
+  q_.pop();
+
+  return 1;
+}
+
+template<class T>
+size_t Que<T>::size() const {
+  return q_.size();
+}
+
+#endif
+```
+
+一些具体的细节，看gtest的文档即可。我说下测试成员函数和普通函数的一些细节：
+- 非成员函数，多个测例给到不同的输入，测试不同program path
+- 成员函数，多个测例测试不同的成员函数，测例内部给到不同的数据，测试不同的program path.
+- 对于program path的测试，可以他通过多组断言来验证，这个能力要有。参考对于Deque的测试
+
+```cpp
+#include <gtest/gtest.h>
+
+#include "src/que.h"
+
+class QueTest : public ::testing::Test {
+ protected:
+
+  void SetUp() override {
+    q1_.Enque(1);
+
+    q2_.Enque(2);
+    q2_.Enque(3);
+  }
+
+  // void TearDown() override {}
+
+  Que<int> q0_;
+  Que<int> q1_;
+  Que<int> q2_;
+};
+
+TEST_F(QueTest, IsEmptyInitially) {
+  EXPECT_EQ(q0_.size(), 0);
+}
+
+TEST_F(QueTest, EnqueWorks) {
+  q0_.Enque(1);
+  EXPECT_EQ(q0_.size(), 1);
+}
+
+TEST_F(QueTest, DequeWorks) {
+  int e = 0;
+  int status = q0_.Deque(&e);
+  EXPECT_EQ(status, 0);
+
+  status = q1_.Deque(&e);
+  EXPECT_EQ(status, 1);
+  EXPECT_EQ(q1_.size(), 0);
+  EXPECT_EQ(e, 1);
+
+  status = q2_.Deque(&e);
+  EXPECT_EQ(status, 1);
+  EXPECT_EQ(q2_.size(), 1);
+  EXPECT_EQ(e, 2);
+}
+
+int main(int argc, char* argv[]) {
+  testing::InitGoogleTest(&argc, argv);
+
+  return RUN_ALL_TESTS();
+}
+```
+
+最后，```main```函数不写也是可以的，需要```-lgtest_main```
