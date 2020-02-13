@@ -209,3 +209,8 @@ q:virtual destructor底层是怎么实现的？
 q:virtual function 与 rule of three是否矛盾?
 >不矛盾。只不过当我们使用rule of three时，此时如果在继承层次里面，那么析构函数需要virtual声明，如果不在继承层次，不需要。
 如果根本不用rule of three，也更谈不上加virtual.
+
+参考<br>
+
+[Virtual Destructor](https://www.geeksforgeeks.org/virtual-destructor/)<br>
+[When to use virtual destructors?](https://stackoverflow.com/questions/461203/when-to-use-virtual-destructors)
