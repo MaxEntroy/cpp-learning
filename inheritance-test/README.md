@@ -100,4 +100,112 @@ Error.Balance not available for base type.
 */
 ```
 
+q:基类(我们讨论基类肯定是在继承体系当中)和派生类的析构函数为什么一定要声明为virtual?
 
+- 基类析构(nono-virtual)派生类析构(non-virtual)
+```cpp
+// base.h
+#ifndef BASE_H_
+#define BASE_H_
+
+class Base {
+ public:
+  Base() {}
+  ~Base();
+
+  virtual void NameOf();
+  void InvokingClass();
+};
+
+#endif
+
+// derived.h
+#ifndef DERIVED_H_
+#define DERIVED_H_
+
+#include "base.h"
+
+class Derived : public Base {
+ public:
+  Derived() : Base() {}
+  ~Derived();
+
+  virtual void NameOf();
+  void InvokingClass();
+
+};
+
+#endif
+
+// main.cc
+#include <iostream>
+
+#include "base.h"
+#include "derived.h"
+
+int main(void) {
+
+  Base* p_base = new Derived();       // 动态调用 dynamic type checking 异常析构，资源泄露
+  Derived* p_derived = new Derived(); // 静态调用 static type checking 正常析构
+  Derived a_derived;                  // 静态调用 static type checking 正常熊沟
+
+  delete p_base;
+  std::cout << "-------------" << std::endl;
+  delete p_derived;
+  std::cout << "-------------" << std::endl;
+
+  return 0;
+}
+
+/*
+Deleting Base.
+-------------
+Deleting Derived.
+Deleting Base.
+-------------
+Deleting Derived.
+Deleting Base.
+*/
+```
+
+很明显，我们可以发现:
+1.静态调用时，析构函数不声明为virtual并没有问题。多说一句，静态调用是指，用到static type checking
+2.动态调用，只能析构基类，派生类无法析构。如果派生类中进行资源申请，则资源泄漏.
+
+- 基类析构(virtual)派生类析构(non-virtual)
+
+```cpp
+/*
+Deleting Derived.
+Deleting Base.
+-------------
+Deleting Derived.
+Deleting Base.
+-------------
+Deleting Derived.
+Deleting Base.
+*/
+```
+
+此时，派生类已经正常析构。派生类加了析构函数，我也进行了测试，结果一致。因此在基类增加析构函数即可.
+
+q:为什么基类的析构不加virtual,派生类就不能正常析构？
+>首先，更正一下，不是基类析构不加virtual，派生类就不能正常析构。当static type checking时，可以正常析构。
+只有当进行dynamic type checking时，才不能析构。更详细一点：
+
+>Deleting a derived class object using a pointer to a base class that has a non-virtual destructor results in undefined behavior. 
+
+>首先，这么用是未定义行为，所以上面的理解，不完全正确。
+
+>In most implementations, the call to the destructor will be resolved like any non-virtual code, meaning that the destructor of the base class will be called but not the one of the derived class, resulting in a resources leak.
+>
+>大部分编译器的实现，基类指针指向派生类对象，在派生类对象进行析构时，对于析构函数的调用类似于对于non-virtual函数的调用，即执行
+static type checking，所以只调用了基类的析构函数。所以，对于基类的析构函数需要加上virtual
+
+q:virtual destructor底层是怎么实现的？
+>既然上文也提到，不加virtual的行为，类似于non-virtual函数。加了virtual的行为显然是有了虚函数底层机制的支持。当然，
+我还没有仔细考究这部分，先到着了。我把加与不加的符号dump出来，发现符号表也是有变化的。
+
+q:virtual function 与 rule of three是否矛盾?
+>不矛盾。只不过当我们使用rule of three时，此时如果在继承层次里面，那么析构函数需要virtual声明，如果不在继承层次，不需要。
+如果根本不用rule of three，也更谈不上加virtual.

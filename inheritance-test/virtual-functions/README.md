@@ -16,3 +16,7 @@ q:redefined vs override
 >在根目录README进行了介绍。本质上来说，redefined使用的底层机制
 是static type checking，所以不会发生多态，及时基类的指针或者引用
 指向派生类也没用。后者则是dynamic type checking，可用到rtti信息
+
+## demo-03
+
+本小节主要说析构函数不声明为virtual的问题
