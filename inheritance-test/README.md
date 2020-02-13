@@ -1,6 +1,7 @@
 ## inheritance
 
 本小节来自于对于msdn的学习
+[Inheritance (C++)](https://docs.microsoft.com/en-us/cpp/cpp/inheritance-cpp?view=vs-2019)
 
 ### overview
 
@@ -16,19 +17,23 @@ q:什么是virtual function，他的语义又是什么?
 >A virtual function is a member function that you expect to be redefined in derived classes.When you refer to a derived class object using a pointer or a reference to the base class, you can call a virtual function for that object and execute the derived class's version of the function.
 >
 >简单来说，我理解的虚函数的语义，是为了实现接口来准备。比如java当中的interface定义接口，然后派生类实现这个接口。就是这么个语义。
-本质来说，提供了接口的语义。说的详细一点：1.成员函数 2.派生类中可以重定义 3.基类指针调用接口，实际调用的并不一定是基类对象的接口，而是其指向的派生类对象的接口
+本质来说，提供了接口的语义。说的详细一点：
+1.成员函数 
+2.必须在继承层次中讨论，否则无意义
+3.派生类中可以重写 
+4.基类指针调用接口，实际调用的并不一定是基类对象的接口，而是其指向的派生类对象的接口
 
 q:redefine vs override?
 >注意，我们上文说的，虚函数本质是接口，在派生类当中希望redefine，此处的redefine指的是更通用意义上的redefine。只不过，
 对于虚函数和非虚函数的redefine，导致我们进一步区别了redefine and override.
->
->
+
+
 >Here are some basic differences:
->
-An **overloaded** function is a function that shares its name with one or more other functions, 
+
+>An **overloaded** function is a function that shares its name with one or more other functions, 
 but which has a different parameter list. 
 The compiler chooses which function is desired based upon the arguments used.
->
+
 >An **overridden** function is a method in a descendant class 
 that has a different definition than a virtual function in an ancestor class. 
 The compiler chooses which function is desired based upon the type of the object being used to call the function.
