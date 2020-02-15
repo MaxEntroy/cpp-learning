@@ -3,7 +3,7 @@
 本小节来自于对于msdn的学习
 [Inheritance (C++)](https://docs.microsoft.com/en-us/cpp/cpp/inheritance-cpp?view=vs-2019)
 
-### overview
+### Overview
 
 q:什么是继承?
 >New classes can be derived from existing classes using a mechanism called "inheritance".
@@ -11,7 +11,7 @@ q:什么是继承?
 >
 >我们说的机制又是指什么呢？其实就是语言有没有给你这样的能力，具体来说就是有没有语法支持
 
-### virtual functions
+### Virtual Functions
 
 q:什么是virtual function，他的语义又是什么?
 >A virtual function is a member function that you expect to be redefined in derived classes.When you refer to a derived class object using a pointer or a reference to the base class, you can call a virtual function for that object and execute the derived class's version of the function.
@@ -214,3 +214,356 @@ q:virtual function 与 rule of three是否矛盾?
 
 [Virtual Destructor](https://www.geeksforgeeks.org/virtual-destructor/)<br>
 [When to use virtual destructors?](https://stackoverflow.com/questions/461203/when-to-use-virtual-destructors)
+
+### Single Inheritance
+
+q:inheriance语义是什么?(描述了一种怎样的逻辑关系)
+> derived class has a "kind of" relationship with the base class.
+>
+>继承其实说了两个类型的关系，朴素的看，这两个类型存在一种部分和整体的逻辑关系。基类是整体，派生类是部分。代表了一种从一般到具体的过程。
+但是从集合的角度来看，刚好反过来。基类是一个小集合，而派生类是一个大集合。
+
+q:派生类是否可以访问基类？如何访问？
+>从集合角度来说，基类是派生类的子集，所以派生类有能力访问基类。
+通过scope-resolution operator(::)来访问。
+
+### Multiple Base Classes
+
+q:what is multi-inheritance model?
+>In a multiple-inheritance model, A class can be derived from more than one base class
+
+q:多重继承当中，基类申明的顺序有什么影响?
+>The order in which base classes are specified is not significant except in certain cases where constructors and destructors are invoked.
+>
+>只会影响，基类进行构造和析构的顺序。这个顺序通常没什么问题，哪个基类先构造或者先析构没有关系。
+除非，基类的构造和析构需要明确的先后关系时，此时这个顺序是影响的.
+
+q:多重继承中，基类的声明顺序，有什么需要特别注意的地方？
+>The order of specification of base classes can affect the memory layout of the class. 
+Do not make any programming decisions based on the order of base members in memory.
+
+q:多重继承有什么不尽如人意的地方？
+>派生类中可能有基类的多份副本.
+
+我们看一个例子:
+```cpp
+// queue.h
+#ifndef CASHIER_LUNCH_QUEUE_H_
+#define CASHIER_LUNCH_QUEUE_H_
+
+#include <iostream>
+
+#include "cashier_queue.h"
+#include "lunch_queue.h"
+
+class CashierLunchQueue :
+  public CashierQueue, public LunchQueue {
+ public:
+  CashierLunchQueue() : CashierQueue(), LunchQueue() {
+    std::cout << "CashierLunchQueue called." << std::endl;
+  }
+};
+
+#endif
+
+// cashier_queue.h
+#ifndef CASHIER_QUEUE_H_
+#define CASHIER_QUEUE_H_
+
+#include <iostream>
+
+#include "queue.h"
+
+class CashierQueue : public Queue {
+ public:
+  CashierQueue() : Queue() {
+    std::cout << "CashierQueue called." << std::endl;
+  }
+};
+
+#endif
+
+// lunch_queue.h
+#ifndef LUNCH_QUEUE_H_
+#define LUNCH_QUEUE_H_
+
+#include <iostream>
+
+#include "queue.h"
+
+class LunchQueue : public Queue {
+ public:
+  LunchQueue() : Queue() {
+    std::cout << "LunchQueue called." << std::endl;
+  }
+};
+
+#endif
+
+// cashier_lunch_queue.h
+#ifndef CASHIER_LUNCH_QUEUE_H_
+#define CASHIER_LUNCH_QUEUE_H_
+
+#include <iostream>
+
+#include "cashier_queue.h"
+#include "lunch_queue.h"
+
+class CashierLunchQueue :
+  public CashierQueue, public LunchQueue {
+ public:
+  CashierLunchQueue() : CashierQueue(), LunchQueue() {
+    std::cout << "CashierLunchQueue called." << std::endl;
+  }
+};
+
+#endif
+
+// main.cc
+#include "cashier_lunch_queue.h"
+
+int main(void) {
+  CashierLunchQueue que;
+  return 0;
+}
+
+
+/*
+Queue constructor called.
+CashierQueue called.
+Queue constructor called.
+LunchQueue called.
+CashierLunchQueue called.
+*/
+```
+通过上面代码的执行结果，我们可以发现
+- CashierLunchQueue当中，存在Queue的两份副本
+- 派生类只负责对直接基类(direct base)进行构造
+- 派生类先执行基类的构造，再执行派生类构造
+- 派生类执行基类构造的顺序按照声明继承基类的顺序执行
+
+q:multiple inheritance不采用virtual inheritance，参数构造时有什么需要注意的?
+>此时会产生diamond problem，所以在最终的派生类中有多份基类副本，要保证多份基类都得到构造才行。
+此时的构造并无特别需要注意的，还是派生类负责直接基类的构造即可
+
+我们看个例子
+
+```cpp
+// que.h
+#ifndef QUEUE_H_
+#define QUEUE_H_
+
+#include <iostream>
+
+class Queue {
+ public:
+  Queue(int cnt) : que_cnt_(cnt) {
+    std::cout << "Queue constructor called. que_cnt = " << que_cnt_ << std::endl;
+  }
+
+ private:
+  int que_cnt_;
+};
+
+#endif
+
+// cashier_que.h
+#ifndef CASHIER_QUEUE_H_
+#define CASHIER_QUEUE_H_
+
+#include <iostream>
+
+#include "queue.h"
+
+class CashierQueue : public Queue {
+ public:
+  CashierQueue(int cashier_cnt, int cnt) :
+    Queue(cnt), cashier_que_cnt_(cashier_cnt) {
+    std::cout << "CashierQueue called. cashier_que_cnt = " << cashier_que_cnt_ << std::endl;
+  }
+
+ private:
+  int cashier_que_cnt_;
+};
+
+#endif
+
+// lunch_que.h
+#ifndef LUNCH_QUEUE_H_
+#define LUNCH_QUEUE_H_
+
+#include <iostream>
+
+#include "queue.h"
+
+class LunchQueue : public Queue {
+ public:
+  LunchQueue(int lunch_cnt, int cnt) :
+    Queue(cnt), lunch_que_cnt_(lunch_cnt){
+    std::cout << "LunchQueue called. lunch_que_cnt = " << lunch_que_cnt_ << std::endl;
+  }
+
+ private:
+  int lunch_que_cnt_;
+};
+
+#endif
+
+// cashier_lunch_que.h
+#ifndef CASHIER_LUNCH_QUEUE_H_
+#define CASHIER_LUNCH_QUEUE_H_
+
+#include <iostream>
+
+#include "cashier_queue.h"
+#include "lunch_queue.h"
+
+class CashierLunchQueue :
+  public CashierQueue, public LunchQueue {
+ public:
+  CashierLunchQueue(int cashier_lunch_cnt,
+                    int cashier_cnt, int cashier_cnt1,
+                    int lunch_cnt, int lunch_cnt1) :
+    CashierQueue(cashier_cnt, cashier_cnt1),
+    LunchQueue(lunch_cnt, lunch_cnt1),
+    cashier_lunch_que_cnt_(cashier_lunch_cnt){
+    std::cout << "CashierLunchQueue called. cashier_lunch_que_cnt = " << cashier_lunch_que_cnt_ << std::endl;
+  }
+
+ private:
+  int cashier_lunch_que_cnt_;
+};
+
+#endif
+
+// main.cc
+#include "cashier_lunch_queue.h"
+
+int main(void) {
+  CashierLunchQueue que(111,1,2,11,22);
+  return 0;
+}
+
+/*
+Queue constructor called. que_cnt = 2
+CashierQueue called. cashier_que_cnt = 1
+Queue constructor called. que_cnt = 22
+LunchQueue called. lunch_que_cnt = 11
+CashierLunchQueue called. cashier_lunch_que_cnt = 111
+*/
+```
+
+通过以上结果我们可以发现：
+- multiple-inheritance不采用virtual inheritance时，与single-inheritance没有区别，派生类只负责直接基类的构造
+- 最终派生类中的多份副本，的确需要各个直接基类的多次构造，来完成对于多份间接基类的构造
+
+q:virtual inheritance当中的间接基类如何构造?
+>显然，由于此时只有一份间接基类。所以，间接基类的构造不能交给直接基类去构造，因为会产生冲突(到底以哪个直接父类的构造为准呢？)
+所以， 此时间接基类的构造由最终派生类完成。虽然形式上，直接基类还是要负责对于间接基类的构造，但是并不生效。
+
+代码如下：
+```cpp
+// queue.h
+#ifndef QUEUE_H_
+#define QUEUE_H_
+
+#include <iostream>
+
+class Queue {
+ public:
+  Queue(int cnt) : que_cnt_(cnt) {
+    std::cout << "Queue constructor called. que_cnt = " << que_cnt_ << std::endl;
+  }
+
+ private:
+  int que_cnt_;
+};
+
+#endif
+
+// cashier_queue.h
+#ifndef CASHIER_QUEUE_H_
+#define CASHIER_QUEUE_H_
+
+#include <iostream>
+
+#include "queue.h"
+
+class CashierQueue : virtual public Queue {
+ public:
+  CashierQueue(int cashier_cnt, int cnt) :
+    Queue(cnt), cashier_que_cnt_(cashier_cnt) {
+    std::cout << "CashierQueue called. cashier_que_cnt = " << cashier_que_cnt_ << std::endl;
+  }
+
+ private:
+  int cashier_que_cnt_;
+};
+
+#endif
+
+// lunch_queue.h
+#ifndef LUNCH_QUEUE_H_
+#define LUNCH_QUEUE_H_
+
+#include <iostream>
+
+#include "queue.h"
+
+class LunchQueue : virtual public Queue {
+ public:
+  LunchQueue(int lunch_cnt, int cnt) :
+    Queue(cnt), lunch_que_cnt_(lunch_cnt){
+    std::cout << "LunchQueue called. lunch_que_cnt = " << lunch_que_cnt_ << std::endl;
+  }
+
+ private:
+  int lunch_que_cnt_;
+};
+
+#endif
+
+// cashier_lunch_queue.h
+#ifndef CASHIER_LUNCH_QUEUE_H_
+#define CASHIER_LUNCH_QUEUE_H_
+
+#include <iostream>
+
+#include "cashier_queue.h"
+#include "lunch_queue.h"
+
+class CashierLunchQueue :
+  public CashierQueue, public LunchQueue {
+ public:
+  CashierLunchQueue(int cashier_lunch_cnt,
+                    int cashier_cnt,
+                    int lunch_cnt,
+                    int cnt) :
+    Queue(cnt),
+    CashierQueue(cashier_cnt, cnt),
+    LunchQueue(lunch_cnt, cnt),
+    cashier_lunch_que_cnt_(cashier_lunch_cnt){
+    std::cout << "CashierLunchQueue called. cashier_lunch_que_cnt = " << cashier_lunch_que_cnt_ << std::endl;
+  }
+
+ private:
+  int cashier_lunch_que_cnt_;
+};
+
+#endif
+
+// main.cc
+#include "cashier_lunch_queue.h"
+
+int main(void) {
+  CashierLunchQueue que(333,11,22,0);
+  return 0;
+}
+
+/*
+Queue constructor called. que_cnt = 0
+CashierQueue called. cashier_que_cnt = 11
+LunchQueue called. lunch_que_cnt = 22
+CashierLunchQueue called. cashier_lunch_que_cnt = 333
+*/
+```
