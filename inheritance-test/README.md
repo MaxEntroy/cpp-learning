@@ -567,3 +567,121 @@ LunchQueue called. lunch_que_cnt = 22
 CashierLunchQueue called. cashier_lunch_que_cnt = 333
 */
 ```
+
+q:当继承路径上存在virtual inheritance and non-virtual inhetitance时，间接基类的副本有几份？间接基类的构造又如何?
+>我直接给结论：
+- 间接基类多少取决于virtual inheritance的路径数
+  - 比如有M条path，其中virtual inheritance有N条path, 那么最后的间接基类副本有M-N+1个
+  - 虽然没有深究virtual inheritance的对象布局，但是可以猜测得到，所有virtual inheritance path的间接基类都是共享的
+- virtual-inheritance path的间接基类，最后派生类进行构造。其余由直接基类进行构造
+
+```cpp
+// queue.h
+#ifndef QUEUE_H_
+#define QUEUE_H_
+
+#include <iostream>
+
+class Queue {
+ public:
+  Queue(int cnt) : que_cnt_(cnt) {
+    std::cout << "Queue constructor called. que_cnt = " << que_cnt_ << std::endl;
+  }
+
+ private:
+  int que_cnt_;
+};
+
+#endif
+
+// cashier_queue.h
+#ifndef CASHIER_QUEUE_H_
+#define CASHIER_QUEUE_H_
+
+#include <iostream>
+
+#include "queue.h"
+
+class CashierQueue : public Queue {
+ public:
+  CashierQueue(int cashier_cnt, int cnt) :
+    Queue(cnt-16), cashier_que_cnt_(cashier_cnt) {
+    std::cout << "CashierQueue called. cashier_que_cnt = " << cashier_que_cnt_ << std::endl;
+  }
+
+ private:
+  int cashier_que_cnt_;
+};
+
+#endif
+
+// lunch_queue.h
+#ifndef LUNCH_QUEUE_H_
+#define LUNCH_QUEUE_H_
+
+#include <iostream>
+
+#include "queue.h"
+
+class LunchQueue : virtual public Queue {
+ public:
+  LunchQueue(int lunch_cnt, int cnt) :
+    Queue(cnt-16), lunch_que_cnt_(lunch_cnt){
+    std::cout << "LunchQueue called. lunch_que_cnt = " << lunch_que_cnt_ << std::endl;
+  }
+
+ private:
+  int lunch_que_cnt_;
+};
+
+#endif
+
+// cashier_lunch_queue.h
+#ifndef CASHIER_LUNCH_QUEUE_H_
+#define CASHIER_LUNCH_QUEUE_H_
+
+#include <iostream>
+
+#include "cashier_queue.h"
+#include "lunch_queue.h"
+
+class CashierLunchQueue :
+  public CashierQueue, public LunchQueue {
+ public:
+  CashierLunchQueue(int cashier_lunch_cnt,
+                    int cashier_cnt,
+                    int lunch_cnt,
+                    int cnt) :
+    Queue(cnt),
+    CashierQueue(cashier_cnt, cnt),
+    LunchQueue(lunch_cnt, cnt),
+    cashier_lunch_que_cnt_(cashier_lunch_cnt){
+    std::cout << "CashierLunchQueue called. cashier_lunch_que_cnt = " << cashier_lunch_que_cnt_ << std::endl;
+  }
+
+ private:
+  int cashier_lunch_que_cnt_;
+};
+
+#endif
+
+// main.cc
+#include "cashier_lunch_queue.h"
+
+int main(void) {
+  CashierLunchQueue que(333,11,22,0);
+  return 0;
+}
+
+/*
+Queue constructor called. que_cnt = 0
+Queue constructor called. que_cnt = -16
+CashierQueue called. cashier_que_cnt = 11
+LunchQueue called. lunch_que_cnt = 22
+CashierLunchQueue called. cashier_lunch_que_cnt = 333
+*/
+```
+
+从上述验证代码中可以看出：1.间接基类有多份 2.virtual-inheritance path的间接基类由最后派生类进行构造，直接派生类构造没用。
+但是，non-virtual inheritance path的间接基类则是由直接派生类进行构造。3.只要存在一条virtual-inheritance path，最后派生类就需要
+对其进行构造

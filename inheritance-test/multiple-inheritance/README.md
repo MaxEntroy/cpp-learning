@@ -9,3 +9,7 @@
 ## demo-03
 
 虚继承解决diamond-problems
+
+## demo-04
+
+虚继承和非虚继承都存在时的讨论
