@@ -7,7 +7,7 @@
 
 q:什么是继承?
 >New classes can be derived from existing classes using a mechanism called "inheritance".
-从已经存在的类派生出新来的机制，叫做继承。显然对于像lua这样的语言，并不支持，因为没有这样的机制。
+从已经存在的类派生出新类的机制，叫做继承。显然对于像lua这样的语言，并不支持，因为没有这样的机制。
 >
 >我们说的机制又是指什么呢？其实就是语言有没有给你这样的能力，具体来说就是有没有语法支持
 
@@ -229,10 +229,12 @@ q:派生类是否可以访问基类？如何访问？
 
 ### Multiple Base Classes
 
+#### Diamond problems
+
 q:what is multi-inheritance model?
 >In a multiple-inheritance model, A class can be derived from more than one base class
 
-q:多重继承当中，基类申明的顺序有什么影响?
+q:多重继承当中，基类声明顺序有什么影响?
 >The order in which base classes are specified is not significant except in certain cases where constructors and destructors are invoked.
 >
 >只会影响，基类进行构造和析构的顺序。这个顺序通常没什么问题，哪个基类先构造或者先析构没有关系。
@@ -457,9 +459,15 @@ CashierLunchQueue called. cashier_lunch_que_cnt = 111
 - multiple-inheritance不采用virtual inheritance时，与single-inheritance没有区别，派生类只负责直接基类的构造
 - 最终派生类中的多份副本，的确需要各个直接基类的多次构造，来完成对于多份间接基类的构造
 
-q:virtual inheritance当中的间接基类如何构造?
+q:virtual inheritance当中的间接基类如何构造?有什么特别注意的地方?
 >显然，由于此时只有一份间接基类。所以，间接基类的构造不能交给直接基类去构造，因为会产生冲突(到底以哪个直接父类的构造为准呢？)
 所以， 此时间接基类的构造由最终派生类完成。虽然形式上，直接基类还是要负责对于间接基类的构造，但是并不生效。
+>
+>最终派生类负责对于间接基类构造时，必须先调用间接基类的构造函数。
+我们知道，在类的继承层次当中，构造的顺序是自上而下的，虽然是从最底层的派生类开始构造。但是，这相当于一个栈层次
+最底层派生类先入栈，然后直接基类入栈，然后间接基类入栈，间接基类构造出栈，直接基类构造出栈，最后最底层派生类构造出栈
+所以，最上层的构造函数必须先构造，但是由于在diamond path当中，直接基类不负责对于间接基类的构造，既然是最后派生类进行构造
+就必须先构造层次最高的间接基类
 
 代码如下：
 ```cpp
@@ -683,5 +691,163 @@ CashierLunchQueue called. cashier_lunch_que_cnt = 333
 ```
 
 从上述验证代码中可以看出：1.间接基类有多份 2.virtual-inheritance path的间接基类由最后派生类进行构造，直接派生类构造没用。
-但是，non-virtual inheritance path的间接基类则是由直接派生类进行构造。3.只要存在一条virtual-inheritance path，最后派生类就需要
-对其进行构造
+但是，non-virtual inheritance path的间接基类则是由直接派生类进行构造。3.只要存在一条virtual-inheritance path，最后派生类就需要对其进行构造
+
+#### Name ambugities
+
+q:什么是Name ambugities?
+>Multiple inheritance introduces the possibility for names to be inherited along more than one path. The class-member names along these paths are not necessarily unique. These name conflicts are called "ambiguities."
+>
+>简言之，多继承的路径当中，如果存在同名名称，则最后派生类当中存在名字二义性。
+
+我们看下看下面的代码：
+```cpp
+// button.h
+#ifndef BUTTON_H_
+#define BUTTON_H_
+
+class Button {
+ public:
+  Button() {}
+  void NameOf();
+};
+
+#endif
+
+// circle.h
+#ifndef CIRCLE_H_
+#define CIRCLE_H_
+
+class Circle {
+ public:
+  Circle() {}
+  void NameOf();
+};
+
+#endif
+
+// circle_button.h
+#include "circle.h"
+#include "button.h"
+
+class CircleButton : public Circle, public Button {
+ public:
+  CircleButton() : Circle(), Button() {}
+};
+
+// main.cc
+#include "circle_button.h"
+
+int main(void) {
+  CircleButton* p = new CircleButton();
+
+  p->NameOf();
+
+  delete p;
+  return 0;
+}
+
+/*
+main.cc:6:6: error: member 'NameOf' found in multiple base classes of different types
+  p->NameOf();
+     ^
+./circle.h:7:8: note: member found by ambiguous name lookup
+  void NameOf();
+       ^
+./button.h:7:8: note: member found by ambiguous name lookup
+  void NameOf();
+       ^
+1 error generated.
+make: *** [main.o] Error 1
+*/
+```
+
+q:如何解决name ambiguties?
+>When an expression produces an ambiguity through inheritance, you can manually resolve it by qualifying the name in question with its class name. 
+>
+>通过类名进行作用域限制，从而避免二义性
+
+比如，对于上面的代码，可以这样修改
+```cpp
+p->Button::NameOf();
+```
+
+q:virtual inheritance是否存在name ambiguties?
+>我自己觉得，这两个问题不完全在同一个层面上。因为多继承也不一定会形成diamond problems。
+而name ambiguties更多的是两个直接基类里面的同名成员出现名字冲突。和是否虚继承没有直接关系，因为后者
+说的是间接基类在最后派生类当中内存布局的问题。
+>
+>所以，会存在.
+
+```cpp
+// object.h
+#ifndef OBJECT_H_
+#define OBJECT_H_
+
+#include <iostream>
+
+class Object {
+ public:
+  Object() {}
+  void NameOf() {std::cout << "This is an object." << std::endl;}
+};
+
+#endif
+
+// button.h
+#ifndef BUTTON_H_
+#define BUTTON_H_
+
+#include "object.h"
+
+class Button : virtual public Object {
+ public:
+  Button() : Object(){}
+  void NameOf() {std::cout << "This is a button." << std::endl;}
+};
+
+#endif
+
+// circle.h
+#ifndef CIRCLE_H_
+#define CIRCLE_H_
+
+class Circle {
+ public:
+  Circle() {}
+  void NameOf();
+};
+
+#endif
+
+// main.cc
+#include "circle_button.h"
+
+int main(void) {
+  CircleButton* p = new CircleButton();
+
+  p->NameOf();
+
+  delete p;
+  return 0;
+}
+
+/*
+main.cc:6:6: error: member 'NameOf' found in multiple base classes of different types
+  p->NameOf();
+     ^
+./circle.h:9:8: note: member found by ambiguous name lookup
+  void NameOf() {std::cout << "This is a circle" << std::endl;}
+       ^
+./button.h:9:8: note: member found by ambiguous name lookup
+  void NameOf() {std::cout << "This is a button." << std::endl;}
+       ^
+1 error generated.
+make: *** [main.o] Error 1
+*/
+```
+
+q:如果在间接基类和直接基类当中存在dominance，最后派生类是否有能力看到间接基类的成员?
+>理论说当然可以，毕竟最后派生类当中有间接基类的成员。
+但是，直接派生类中的同名成员对前者进行了覆盖。
+所以，如果要看到，直接派生类再提供一个方法即可
