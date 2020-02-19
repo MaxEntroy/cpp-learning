@@ -207,8 +207,14 @@ q:virtual destructor底层是怎么实现的？
 我还没有仔细考究这部分，先到着了。我把加与不加的符号dump出来，发现符号表也是有变化的。
 
 q:virtual function 与 rule of three是否矛盾?
->不矛盾。只不过当我们使用rule of three时，此时如果在继承层次里面，那么析构函数需要virtual声明，如果不在继承层次，不需要。
-如果根本不用rule of three，也更谈不上加virtual.
+>不完全矛盾.
+我们先来看rule of three，这个规则是说，当你自定义copy constructor时，潜在的可能是涉及到资源申请，
+那么通常，assignment operator也需要重载进行资源管理，同时destructor也需要进行资源管理。此时这3个函数都得写。
+此时，destructor声明为virtual到也没什么好说的。
+>
+>但问题是，我们看到上面的例子，上面的代码没有进行资源管理，所以copy constructor,assignment operator都不需要实现和重载。
+按照rule of three是不用，但是如果析构函数不声明为virtual，在进行多态时，无法析构派生类。
+原因也说了，析构的时候，进行static type checking，毕竟是基类的指针，所以调用基类的析构，此时无法析构派生类
 
 参考<br>
 
@@ -851,3 +857,225 @@ q:如果在间接基类和直接基类当中存在dominance，最后派生类是
 >理论说当然可以，毕竟最后派生类当中有间接基类的成员。
 但是，直接派生类中的同名成员对前者进行了覆盖。
 所以，如果要看到，直接派生类再提供一个方法即可
+
+q:ambiguous conversion指的是什么?
+>Explicit and implicit conversions from pointers or references to class types can cause ambiguities
+>
+>上面这段话乍一看无法理解，需要结合更多细节来看。我先给一个结论：一个派生类的地址，转换到间接基类的地址，可能会产生二义性。
+因为，如果继承形成diamond path，显然派生类当中存在多份间接基类的对象，那么当派生类地址进行转换时，无法判断到底转换到
+哪一个间接基类的对象.
+
+```cpp
+// object.h
+#ifndef OBJECT_H_
+#define OBJECT_H_
+
+#include <iostream>
+
+class Object {
+ public:
+  Object() {}
+  virtual ~Object() {}
+
+  virtual void NameOf() {std::cout << "This is an object." << std::endl;}
+};
+
+#endif
+
+// button.h
+#ifndef BUTTON_H_
+#define BUTTON_H_
+
+#include "object.h"
+
+class Button : public Object {
+ public:
+  Button() : Object() {}
+  virtual ~Button() {}
+  virtual void NameOf() {std::cout << "This is a button." << std::endl;}
+};
+
+#endif
+
+// circle.h
+#ifndef CIRCLE_H_
+#define CIRCLE_H_
+
+#include "object.h"
+
+class Circle : public Object {
+ public:
+  Circle() : Object() {}
+  virtual ~Circle() {}
+  virtual void NameOf() {std::cout << "This is a circle." << std::endl;}
+};
+
+#endif
+
+// circle_button.h
+#ifndef CIRCLE_BUTTON_H_
+#define CIRCLE_BUTTON_H_
+
+#include "circle.h"
+#include "button.h"
+
+class CircleButton : public Circle, public Button {
+ public:
+  CircleButton() : Circle(), Button() {}
+  virtual ~CircleButton() {}
+  virtual void NameOf() {std::cout << "This is a circle button." << std::endl;}
+};
+
+#endif
+
+// main.cc
+#include "circle_button.h"
+
+int main(void) {
+  CircleButton circle_button;
+  circle_button.NameOf();
+
+  CircleButton* p = &circle_button;
+  p->NameOf();
+
+  Object* p_base = new CircleButton();
+  p_base->NameOf();
+
+  delete p_base;
+  return 0;
+}
+
+/*
+main.cc:10:20: error: ambiguous conversion from derived class 'CircleButton' to base class 'Object':
+    class CircleButton -> class Circle -> class Object
+    class CircleButton -> class Button -> class Object
+  Object* p_base = new CircleButton();
+                   ^~~~~~~~~~~~~~~~~~
+1 error generated.
+make: *** [main.o] Error 1
+*/
+```
+从上面代码能看出来，我其实想做一个多态，因此用基类的指针指向了派生类对象，但是发现出现了以前没见过的问题。
+因为以前的继承都没有构成diamond path.
+
+这里需要补充一些更多的细节：
+- The effect of applying the address-of operator (&) to that object. Note that the address-of operator always supplies the base address of the object.
+- Note that coercing the address of the object to type A* does not always provide the compiler with enough information as to which subobject of type A to select
+
+q:如何解决ambutiguous conversion?
+>Note that you can avoid the ambiguity by explicitly specifying which subobject you mean to use.
+>
+>即，显示指定到底是哪一个间接基类即可
+
+```cpp
+// main.cc
+#include "circle_button.h"
+
+int main(void) {
+  Object* p_base1 = (Object*)(Button*) new CircleButton();
+  p_base1->NameOf();
+
+  Object* p_base2 = (Object*)(Circle*) new CircleButton();
+  p_base2->NameOf();
+
+  delete p_base1;
+  delete p_base2;
+
+  return 0;
+}
+/*
+This is a circle button.
+This is a circle button.
+*/
+```
+
+q:对于ambiguous conversion是否有别的解决办法?
+>之所以这么问是因为，上述结果正确，但是看起来很怪异！
+显然，我们发现上述问题的根本原因在于diamond problems引起的多份副本导致, 既然如此用virtual inheritance解决即可
+
+```cpp
+// object.h
+#ifndef OBJECT_H_
+#define OBJECT_H_
+
+#include <iostream>
+
+class Object {
+ public:
+  Object() {}
+  virtual ~Object() {}
+
+  virtual void NameOf() {std::cout << "This is an object." << std::endl;}
+};
+
+#endif
+
+// button.h
+#ifndef BUTTON_H_
+#define BUTTON_H_
+
+#include "object.h"
+
+class Button : virtual public Object {
+ public:
+  Button() : Object() {}
+  virtual ~Button() {}
+  virtual void NameOf() {std::cout << "This is a button." << std::endl;}
+};
+
+#endif
+
+// circle.h
+#ifndef CIRCLE_H_
+#define CIRCLE_H_
+
+#include "object.h"
+
+class Circle : virtual public Object {
+ public:
+  Circle() : Object() {}
+  virtual ~Circle() {}
+  virtual void NameOf() {std::cout << "This is a circle." << std::endl;}
+};
+
+#endif
+
+// circle_button.h
+#ifndef CIRCLE_BUTTON_H_
+#define CIRCLE_BUTTON_H_
+
+#include "circle.h"
+#include "button.h"
+
+class CircleButton : public Circle, public Button {
+ public:
+  CircleButton() : Circle(), Button() {}
+  virtual ~CircleButton() {}
+  virtual void NameOf() {std::cout << "This is a circle button." << std::endl;}
+};
+
+#endif
+
+// main.cc
+#include "circle_button.h"
+
+int main(void) {
+  CircleButton* p = new CircleButton();
+
+  p->NameOf();
+
+  delete p;
+  return 0;
+}
+
+/*
+This is a circle button.
+*/
+```
+
+### Summary
+
+q:virtual的用法有哪些？
+- virtual inheritance: 解决diamond problems
+- virtual function: 接口，支持多态
+- virtual destructor: 多态时，派生类可以正常析构
