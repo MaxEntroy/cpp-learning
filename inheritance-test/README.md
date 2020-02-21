@@ -1073,9 +1073,292 @@ This is a circle button.
 */
 ```
 
-### Summary
+#### Summary of Virtual functions and multiple inheritance
 
 q:virtual的用法有哪些？
 - virtual inheritance: 解决diamond problems
 - virtual function: 接口，支持多态
 - virtual destructor: 多态时，派生类可以正常析构
+
+### Explicit Overrides
+
+q:explicit overrides主要指什么?
+>If the same virtual function is declared in two or more interfaces and if a class is derived from these interfaces, you can explicitly override each virtual function.
+>
+>这个也是多继承会面临到的问题，多个虚函数重名，其实也存在name ambiguties.那么我理解定义和调用的时候，
+都需要explicit qualifying.
+
+### Abstract Classes
+
+#### virtual destructor
+
+q:派生层次中，构造和析构的顺序是什么样?
+>1.派生类进行构造时，先构造基类，再构造派生类
+2.派生类进行析构时，先析构派生类，再析构基类
+
+```cpp
+// base.h
+#ifndef BASE_H_
+#define BASE_H_
+
+#include <iostream>
+
+class Base {
+ public:
+  Base() {std::cout << "Base() called.\n";}
+  ~Base() {std::cout << "~Base() called.\n";}
+};
+
+#endif
+
+// derived.h
+#ifndef DERIVED_H_
+#define DERIVED_H_
+
+#include "base.h"
+
+class Derived : public Base {
+ public:
+  Derived() : Base() {
+    std::cout << "Derived() called.\n";
+  }
+  ~Derived() {
+    std::cout << "~Derived() called.\n";
+  }
+};
+
+#endif
+
+// main.cc
+#include "derived.h"
+
+int main(void) {
+  Derived a_derived;
+  std::cout << "hello,world!\n";
+  return 0;
+}
+
+/*
+Base() called.
+Derived() called.
+hello,world!
+~Derived() called.
+~Base() called.
+*/
+```
+
+q:派生层次中，virtual destructor的作用是什么?
+>我们先说没有virtual destructor的后果，派生类析构失败.
+具体原因参考virtual functions部分当中的讨论。
+
+```cpp
+// base.h
+// 同上
+
+// derived.h
+// 同上
+
+// main.cc
+#include "derived.h"
+
+int main(void) {
+  Base* p = new Derived();
+  std::cout << "hello,world!\n";
+  delete p;
+  return 0;
+}
+
+/*
+Base() called.
+Derived() called.
+hello,world!
+~Base() called.
+*/
+```
+
+q:是否任何类的析构函数都需要加上virtual?
+>1.如果在一个继承层次当中，基类的析构函数已经声明为virtual，那么该继承层次当中的任何一个派生类都不需要
+讲析构函数声明为virtual，我理解默认就是virtual了。
+2.如果不是在一个继承层次当中，其实没必要。但是有时候你不能确定，所以在设计类时就需要搞清楚，
+你这个类，如果你希望有派生类来继承，那么你需要提供一个virtual destructor，否则就没必要
+
+```cpp
+// base.h
+// 同上
+
+// derived.h
+// 同上
+
+// dderived.h
+#ifndef DDERIVED_H_
+#define DDERIVED_H_
+
+#include "derived.h"
+
+class DDerived : public Derived {
+ public:
+  DDerived() : Derived() {
+    std::cout << "DDerived() called.\n";
+  }
+  ~DDerived() {
+    std::cout << "~DDerived() called.\n";
+  }
+};
+
+#endif
+
+// main.cc
+#include "dderived.h"
+
+int main(void) {
+  Base* p = new DDerived();
+  std::cout << "hello,world!\n";
+
+  delete p;
+  return 0;
+}
+
+/*
+Base() called.
+Derived() called.
+DDerived() called.
+hello,world!
+~DDerived() called.
+~Derived() called.
+~Base() called.
+*/
+```
+
+q:pure virtual destructor的作用是什么？
+>我们先来看一个例子，
+1.首先我们提供一个接口(abstract class)，声明需要重写的接口方法
+2.然后再派生类当中进行实现
+>
+>显然，既然是一个接口(abstract class)，那么是没有必要进行构造和析构的(这么理解有一点问题，稍后修正)
+
+我们来看一下代码
+
+```cpp
+// base.h
+#ifndef BASE_H_
+#define BASE_H_
+
+#include <iostream>
+
+class Base {
+ public:
+  virtual void NameOf() = 0;
+};
+
+#endif
+
+// derived.h
+#ifndef DERIVED_H_
+#define DERIVED_H_
+
+#include "base.h"
+
+class Derived : public Base {
+ public:
+  Derived() {std::cout << "Derived() called.\n";}
+  ~Derived() {std::cout << "~Derived() called.\n";}
+
+  virtual void NameOf() {
+    std::cout << "This is a derived class.\n";
+  }
+};
+
+#endif
+
+// main.cc
+#include "derived.h"
+
+int main(void) {
+  Base* p = new Derived();
+
+  p->NameOf();
+
+  delete p;
+  return 0;
+}
+
+/*
+g++ -std=c++11 -g -Wall -Wextra    -c -o main.o main.cc
+main.cc:8:3: warning: delete called on 'Base' that is abstract but has non-virtual destructor [-Wdelete-non-virtual-dtor]
+  delete p;
+  ^
+1 warning generated.
+g++ -std=c++11 -o main  main.o
+
+Derived() called.
+This is a derived class.
+*/
+```
+
+我们来看一下结果，主要暴露两个问题
+- compile time告警，提示base class需要一个destructor.
+- run time派生类没有完成析构，但实际上派生类我们定义了析构函数
+
+先说第一个问题，我么之前已经讨论过，
+>Deleting a derived class object using a pointer to a base class that has a non-virtual destructor results in undefined behavior.
+
+所以没什么好说的，接口(抽象类)作为基类，需要提供一个virtual-destrucotr。然后我纠正上面的一句话，接口不需要构造和析构，理论上来说
+是这样，但是实际上，**我们只是用abstract class来模拟interface，他们的语义是样的，但是物理实现并不同**。
+
+```cpp
+// base.h
+#ifndef BASE_H_
+#define BASE_H_
+
+#include <iostream>
+
+class Base {
+ public:
+  virtual void NameOf() = 0;
+};
+
+#endif
+
+// 其余同上
+
+/*
+Derived() called.
+This is a derived class.
+~Derived() called.
+~Base() called.
+*/
+```
+
+我们发现，abstract class提供一个virtual-destructor，基类和派生类都得到正常的析构
+
+q:pure virtual destructor的作用又是什么?
+>我参考了stackover flow的高赞答案，没什么太大的作用。
+>
+>
+1.Probably the real reason that pure virtual destructors are allowed is that to prohibit them would mean adding another rule to the language and there's no need for this rule since no ill-effects can come from allowing a pure virtual destructor.
+>
+2.Nope, plain old virtual is enough.
+>
+>可能的作用如下:
+>If you create an object with default implementations for its virtual methods and want to make it abstract without forcing anyone to override any specific method, you can make the destructor pure virtual. I don't see much point in it but it's possible.
+
+#### Details about abstract class
+
+q:抽象类的语义是什么?
+>接口
+
+q:抽象类接口的语义具体是怎么体现的?
+>1.抽象类不能定义实例。但是指向抽象类的指针，可以接受派生类对象的地址。
+2.至少声明一个pure virtual functions的类是抽象类.从抽象类继承的派生类，必须实现全部pure virtual functions，否则任然是抽象类
+3.pure virtual functions通过pure specifier (= 0)声明
+
+q:pure virtual destructor为什么需要一个定义?
+>pure virtual destructor是唯一，需要定义的pure virtual functions
+>because base class destructors are always called in the process of destroying an object
+>
+>当然，基类需要一个virtual destructor，这个道理都明白。但是，是否一定需要一个pure virtual destructor，则不一定。
+
+q:抽象类的构造和析构有什么需要注意的地方?
+>Another restriction is that if the constructor for an abstract class calls a pure virtual function, either directly or indirectly, the result is undefined.
+>
+>对于析构来说，plain old virtual is enough.
