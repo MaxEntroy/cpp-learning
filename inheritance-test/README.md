@@ -3,6 +3,8 @@
 本小节来自于对于msdn的学习
 [Inheritance (C++)](https://docs.microsoft.com/en-us/cpp/cpp/inheritance-cpp?view=vs-2019)
 
+[TOC]
+
 ### Overview
 
 q:什么是继承?
