@@ -1,4 +1,4 @@
-## inheritance
+## Inheritance
 
 本小节来自于对于msdn的学习
 [Inheritance (C++)](https://docs.microsoft.com/en-us/cpp/cpp/inheritance-cpp?view=vs-2019)
@@ -1364,3 +1364,370 @@ q:抽象类的构造和析构有什么需要注意的地方?
 >Another restriction is that if the constructor for an abstract class calls a pure virtual function, either directly or indirectly, the result is undefined.
 >
 >对于析构来说，plain old virtual is enough.
+
+### Others
+
+#### override and final specifier
+
+q:override关键字有什么用?
+>You can use the override keyword to designate member functions that override a virtual function in a base class.
+>
+>即，派生类当中需要override基类当中的virtual functions，通过override进行声明.
+
+q:难道非得用override?
+>当然不是，不用也没问题。override这个关键字在c++11当中提出来，目的是给编译器提供更多的信息。
+Use override to help prevent inadvertent inheritance behavior in your code. 
+>
+>这句话怎么理解呢，我觉得是这样。如果在派生类当中重写(override or intend)基类的虚函数，但是派生类在实现的时候，
+不小心写错了函数标签，那么在派生类当中相当于重新定义了一个member functions，此时并没有实现override，而是进行了redefinition。
+但是，误以为进行了override，那么在进行多态的时候会出现错误。
+>
+>由于是redefinition 而不是 override，所以可以理解为inadvertent inheritance.
+>
+>如果增加了override关键字，则可以避免这个错误。具体来说，
+It will make the compiler to check the base class to see if there is a virtual function with this exact signature. And if there is not, the compiler will show an error.
+即，如果一个派生类在虚函数当中声明了override，那么编译器会在基类当中检查是否存在一样的虚函数，并且函数标签一致。即，如果存在redefinition，
+编译器报错。
+
+我们来看一个例子：
+```cpp
+// base.h
+#ifndef BASE_H_
+#define BASE_H_
+
+#include <iostream>
+
+class Base {
+ public:
+  Base() {}
+  virtual ~Base() {}
+
+  virtual void NameOf() const {
+    std::cout << "Base class.\n";
+  }
+};
+
+#endif
+
+// derived.h
+#ifndef DERIVED_H_
+#define DERIVED_H_
+
+#include "base.h"
+
+class Derived : public Base {
+ public:
+  Derived() : Base() {}
+
+  virtual void NameOf() {
+    std::cout << "Derived class.\n";
+  }
+};
+
+#endif
+
+// main.cc
+#include "derived.h"
+
+int main() {
+  Base* p = new Derived();
+
+  p->NameOf();
+
+  delete p;
+  return 0;
+}
+
+/*
+compile time，由于我开了-Wall选项，其实能发现这个问题，但是不是error
+In file included from main.cc:1:
+./derived.h:10:16: warning: 'Derived::NameOf' hides overloaded virtual function [-Woverloaded-virtual]
+  virtual void NameOf() {
+               ^
+./base.h:11:16: note: hidden overloaded virtual function 'Base::NameOf' declared here: different qualifiers (const vs none)
+  virtual void NameOf() const {
+               ^
+1 warning generated.
+g++ -std=c++11 -o main  main.o
+
+run time:
+Base class.
+*/
+```
+
+很奇怪这个结果，1.基类指针指向派生类 2.虚函数进行了重载
+但是最后没有发生多态。真正的原因就是我们上面讨论的，因为在派生类当中没有发生override，所以dynamic type checking，调用派生类
+对象的vf，但是派生类当中没有，自然调用基类的vf
+
+当我们对在派生类当中的vf，声明为override时，编译器会告诉我们明确的信息
+```cpp
+// derived.h
+#ifndef DERIVED_H_
+#define DERIVED_H_
+
+#include "base.h"
+
+class Derived : public Base {
+ public:
+  Derived() : Base() {}
+
+  virtual void NameOf() override {
+    std::cout << "Derived class.\n";
+  }
+};
+
+#endif
+
+/*
+g++ -std=c++11 -g -Wall -Wextra    -c -o main.o main.cc
+In file included from main.cc:1:
+./derived.h:10:16: error: 'NameOf' marked 'override' but does not override any member functions
+  virtual void NameOf() override {
+               ^
+./derived.h:10:16: warning: 'Derived::NameOf' hides overloaded virtual function [-Woverloaded-virtual]
+./base.h:11:16: note: hidden overloaded virtual function 'Base::NameOf' declared here: different qualifiers (const vs none)
+  virtual void NameOf() const {
+               ^
+1 warning and 1 error generated.
+make: *** [main.o] Error 1
+*/
+```
+
+此时，编译器报错，很明确知道哪里写错了。
+
+```cpp
+// base.h
+#ifndef BASE_H_
+#define BASE_H_
+
+#include <iostream>
+
+class Base {
+ public:
+  Base() {}
+  virtual ~Base() {}
+
+  virtual void NameOf() const {
+    std::cout << "Base class.\n";
+  }
+};
+
+#endif
+
+// derived.h
+#ifndef DERIVED_H_
+#define DERIVED_H_
+
+#include "base.h"
+
+class Derived : public Base {
+ public:
+  Derived() : Base() {}
+
+  virtual void NameOf() const override {
+    std::cout << "Derived class.\n";
+  }
+};
+
+#endif
+
+// main.cc
+#include "derived.h"
+
+int main() {
+  Base* p = new Derived();
+
+  p->NameOf();
+
+  delete p;
+  return 0;
+}
+
+/*
+Derived class.
+*/
+```
+
+参考<br>
+[override Keyword in C++](https://www.geeksforgeeks.org/override-keyword-c/)<br>
+
+### Sumary
+
+- 继承的语义是is-a-kind-of
+- multiple-inheritance可能会导致如下两个问题
+  - diamond problems: virtual inheritance
+  - name ambiguties: explicit qualifying
+- abstract class
+  - 接口语义
+  - pure virtual functions
+- inheritance vs polymorphism
+  - inheritance
+    - inherits the features from the already existing class
+    - supports the concept of code reusability and reduces the length of the code
+    - It is basically applied to classes.
+  - polymorphism
+    - we can perform a task in multiple forms or ways.
+    - allows the object to decide which form of the function to implement at compile-time (overloading) as well as run-time (overriding).
+    - it is basically applied to functions or methods.
+- constructor
+  - 派生类负责直接基类的构造，不负责间接基类
+  - virtual inheritance, 派生类负责直接基类和间接基类的构造，并且间接基类需要先构造
+- destructor
+  - 基类必须提供virtual constructor(plain old is enough)
+  - pure virtual destructor需要一个实现，否则无法析构
+- virtual
+  - virtual inheritance
+  - virtual functions
+    - 基类声明，派生类不需要声明
+    - override keyword, 派生类的虚函数需要override声明(不是必须，参考了leveldb的手法)
+      - 原本派生类虚函数通过virtual声明起到提示作用
+      - c++11支持override，既可以起到提示作用，又能提供编译器更多信息
+
+```cpp
+// shape.h
+#ifndef SHAPE_H_
+#define SHAPE_H_
+
+#include <string>
+
+class Shape {
+ public:
+  virtual ~Shape() {}
+
+ public:
+  virtual std::string NameOf() const = 0;
+  virtual double Area() const = 0;
+};
+
+#endif
+
+// circle.h
+#ifndef CIRCLE_H_
+#define CIRCLE_H_
+
+#include "shape.h"
+
+class Circle : public Shape {
+ public:
+  Circle() {}
+  explicit Circle(double r) : radius_(r) {}
+
+ public:
+  std::string NameOf() const override;
+  double Area() const override;
+
+ private:
+  double radius_;
+};
+
+#endif
+
+// circle.cc
+#include "circle.h"
+
+#include <math.h>
+
+const double PI = atan(1.0) * 4;
+
+std::string Circle::NameOf() const {
+  return "Circle";
+}
+
+double Circle::Area() const {
+  return PI * radius_ * radius_;
+}
+
+// triangle.h
+#ifndef TRIANGLE_H_
+#define TRIANGLE_H_
+
+#include "shape.h"
+
+class Triangle : public Shape {
+ public:
+  Triangle() {}
+  Triangle(double l, double h) : length_(l), height_(h) {}
+
+ public:
+  std::string NameOf() const override;
+  double Area() const override;
+
+ private:
+  double length_;
+  double height_;
+};
+
+#endif
+
+// triangle.cc
+#include "triangle.h"
+
+std::string Triangle::NameOf() const {
+  return "Triangle";
+}
+
+double Triangle::Area() const {
+  return 1.0/2 * length_ * height_;
+}
+
+// rectangle.h
+#ifndef RECTANGLE_H_
+#define RECTANGLE_H_
+
+#include "shape.h"
+
+class Rectangle : public Shape {
+ public:
+  Rectangle() {}
+  Rectangle(double l, double w) : length_(l), width_(w) {}
+
+ public:
+  std::string NameOf() const override;
+  double Area() const override;
+
+ private:
+  double length_;
+  double width_;
+};
+
+#endif
+
+// rectangle.cc
+#include "rectangle.h"
+
+std::string Rectangle::NameOf() const {
+  return "Rectangle";
+}
+
+double Rectangle::Area() const {
+  return length_ * width_;
+}
+
+// main.cc
+#include <iostream>
+
+#include "circle.h"
+#include "rectangle.h"
+#include "triangle.h"
+
+void ShowArea(Shape* p);
+
+int main(void) {
+  Circle cir(1.0);
+  Triangle tri(1.0, 1.0);
+  Rectangle rec(1.0, 1.0);
+
+  ShowArea(&cir);
+  ShowArea(&tri);
+  ShowArea(&rec);
+
+  return 0;
+}
+
+void ShowArea(Shape* p) {
+  std::cout << p->NameOf() << ":" << p->Area() << std::endl;
+}
+```
+
+
+

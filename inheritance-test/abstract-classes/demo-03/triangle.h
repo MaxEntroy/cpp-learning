@@ -9,8 +9,8 @@ class Triangle : public Shape {
   Triangle(double l, double h) : length_(l), height_(h) {}
 
  public:
-  virtual std::string NameOf() const;
-  virtual double Area() const;
+  std::string NameOf() const override;
+  double Area() const override;
 
  private:
   double length_;

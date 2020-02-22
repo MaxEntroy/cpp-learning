@@ -9,8 +9,8 @@ class Circle : public Shape {
   explicit Circle(double r) : radius_(r) {}
 
  public:
-  virtual std::string NameOf() const;
-  virtual double Area() const;
+  std::string NameOf() const override;
+  double Area() const override;
 
  private:
   double radius_;

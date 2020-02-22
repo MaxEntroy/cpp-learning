@@ -9,8 +9,8 @@ class Rectangle : public Shape {
   Rectangle(double l, double w) : length_(l), width_(w) {}
 
  public:
-  virtual std::string NameOf() const;
-  virtual double Area() const;
+  std::string NameOf() const override;
+  double Area() const override;
 
  private:
   double length_;
