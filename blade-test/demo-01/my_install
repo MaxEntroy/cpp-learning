@@ -1,0 +1,22 @@
+#!/bin/bash
+
+blade_dir=$(cd $(dirname $0) && pwd)
+cd $blade_dir
+
+echo -n "Installing vim scripts..."
+mkdir -p ~/.vim/{syntax,ftdetect,indent}
+ln -sf $blade_dir/vim/ftdetect/* ~/.vim/ftdetect/
+ln -sf $blade_dir/vim/syntax/* ~/.vim/syntax/
+ln -sf $blade_dir/vim/indent/* ~/.vim/indent/
+echo ", Done."
+
+echo -n "Installing blade..."
+echo "# blade-build-1.1.2" >> ~/.bash_profile
+echo "export PATH=$PATH:$blade_dir" >> ~/.bash_profile
+echo ", Done."
+
+echo -n "Installing blade auxiliary tools..."
+echo "test -s $blade_dir/bladefunctions && . $blade_dir/bladefunctions || true" >> ~/.bash_profile
+echo ", Done."
+
+echo -e "\033[1;32mAll successful, please log in again or source ~/.bash_profile manually\033[0m"
