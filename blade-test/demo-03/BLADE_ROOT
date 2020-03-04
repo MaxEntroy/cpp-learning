@@ -1,0 +1,15 @@
+cc_config(
+  cxxflags = [
+    '-std=c++11',
+    '-g'
+  ],
+  warnings = [
+    '-Wall',
+    '-Wextra'
+  ],
+  optimize = [
+    '-O3'
+  ],
+  extra_incs = [],
+  linkflags = []
+)
