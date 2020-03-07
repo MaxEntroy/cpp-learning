@@ -61,7 +61,8 @@ TEST(AddTest, HandleNegative) {
 ```
 
 参考<br>
-[gtest快速上手](https://segmentfault.com/a/1190000002454946)
+[gtest快速上手](https://segmentfault.com/a/1190000002454946)<br>
+[How to set up googletest library from source?](https://lchsk.com/how-to-set-up-googletest-library-from-source.html)<br>
 
 ## demo-02
 
