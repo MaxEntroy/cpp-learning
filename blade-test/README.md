@@ -227,3 +227,86 @@ cc_config(
   linkflags = []
 )
 ```
+
+## demo-04 一个进阶项目
+
+### 库的使用
+
+其实对于库的使用，主要就是3点：
+- 头文件路径(头文件怎么找)
+- 库路径(库文件.a/.so怎么找)
+- 库怎么链接
+
+库的使用介绍两种情形，
+- 项目自带，或者项目其它源文件编译而成的库
+  - 头文件，从项目根目录写起即可(否则需要制定incs选项)。blade文档在工作空间组织中给出建议
+  - 库路径，"//path/to/dir/:name"
+  - 库怎么链接，用:进行链接。对于blade而言，项目自带库的链接，是以path:libname的形式给出，所以一举两得
+- 系统库
+  - 头文件，依赖环境变量，和makefile的写法没有区别
+  - 库路径，同上。如果没指定，那就自己指定，extra_incs,link_flags
+  - 库怎么链接，#name
+
+### 库文件更新
+
+显然,blade做的比Makefile好
+- 库文件之间的依赖自动传递，一个库依赖另一个库，库的最终用户不需要关心
+  - blade维护库之间的依赖，通常，应用程序只关心直接使用的库，而不关心间接使用的库
+  - makefile则做不到，需要用户列出，用户程序使用的所有库
+    - 比如，编写proto文件，生成xx_proto.a，应用程序直接依赖这个库。但是间接依赖的protobuf.a，也需要在makefile给出
+- 库文件更新
+  - 使用Makefile时，当某个库更新后，依赖它的目标重新构建时不会更新，只有先make clean才可以(makefile的规则是，只有precondition发生改变，target才会重新build,但是库不写到precondition当中，库是链接选项)
+  - blade维护库之间的依赖关系，当某一个库更新后，依赖它的目标重新build时会自动更新
+
+### 构建c++目标
+
+#### cc_library(构建c++库目标)
+```BUILD
+cc_library(
+  name = "cal",
+  srcs = [
+    "cal.cc"
+  ],
+  deps = []
+)
+```
+cc_library同时用于构建静态和动态库，默认只构建静态库
+
+#### cc_binary(构建c++可执行目标)
+
+#### cc_test(测试目标)
+
+```BUILD
+cc_test(
+  name = "cal_test",
+  srcs = [
+    "cal_test.cc"
+  ],
+  deps = [
+    "//common:cal",
+  ]
+)
+```
+
+相当于cc_binary，再加上自动链接gtest和gtest_main。**这么做的前提是，cc_test_config配置正确**，默认是blade.conf里面的配置，一定要结合项目进行修改
+
+### 构建prorobuf
+
+**proto_library_config配置正确是前提**，否则找不到对应的库
+
+```BUILD
+proto_library(
+  name = "cal_proto",
+  srcs = [
+    "cal_req.proto",
+    "cal_res.proto"
+  ],
+  deps = []
+)
+```
+
+### 总结
+
+blade的优点
+- 自动维护库之间的依赖关系
+- 自动维护头文件间的依赖关系

@@ -33,3 +33,57 @@ torca
 your_project
 ...
 ```
+
+### BUILD文件
+
+我们先来回顾Makefile的写法
+```makefile
+<target> : <prerequisites> 
+[tab]  <commands>
+```
+
+BUILD的写法大同小异，只不过BUILD没有Makefile那么通用，commands都是编译命令。
+所以，只需写清楚target和prerequisites即可
+一个基本的结构如下：
+```BUILD
+cc_library(
+  name = 'string',
+  srcs = [
+      'algorithm.cpp',
+      'string_number.cpp',
+      'string_piece.cpp',
+      'format.cpp',
+      'concat.cpp'
+  ],
+  deps = ['//common/base:int']
+)
+```
+
+Blade用一组**target函数**来定义目标，这些target的通用属性有：
+- name: 字符串，和路径一起成为target的唯一标识，也决定了构建的输出命名
+- srcs: 列表或字符串，构建该对象需要的源文件，一般在当前目录，或相对于当前目录的子目录中
+- deps: 列表或字符串，该对象所依赖的其它targets
+
+deps的允许的格式：
+"//path/to/dir/:name" 其他目录下的target，path为从BLADE_ROOT出发的路径，name为被依赖的目标名。看见就知道在哪里。
+":name" 当前BUILD文件内的target， path可以省略。
+"#name" 系统库。直接写#跟名字即可，比如#pthread，#z分别相当于链接命令行上的-lpthread和-lz，但是会被传递给依赖这个库的其他目标。
+
+对于系统库的定义并不准确，我写的第三方库也可以放到系统库的位置，所以还是从库的位置来说。项目内的库，都用:描述，否则用#描述。
+
+### 配置文件
+
+Blade 只有一种配置文件格式，但是支持多重配置文件，按以下顺序依次查找和加载，后加载的配置文件里存在的配置项会覆盖前面已经加载过的配置项
+
+- 全局级别配置。blade 安装目录下的 blade.conf，这是全局配置。
+- 用户级别配置。~/.bladerc 用户 HOME 目录下的 .bladerc 文件，这是用户级的配置。
+- 项目级别配置。BLADE_ROOT 其实也是个配置文件，写在这里的是项目级配置。
+- 文件级别配置。BLADE_ROOT.local 开发者自己的本地配置文件，用于临时调整参数等用途
+
+对于配置文件的格式，有如下选项：
+- global_config
+- cc_config
+- cc_test_config
+- java_config
+- proto_library_config
+- thrift_config
