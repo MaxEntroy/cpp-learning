@@ -305,8 +305,38 @@ proto_library(
 )
 ```
 
-### 总结
+## 总结
 
-blade的优点
-- 自动维护库之间的依赖关系
-- 自动维护头文件间的依赖关系
+- blade优点
+  - 自动维护库之间的依赖关系。makefile需要重新链接
+  - 自动维护头文件间的依赖关系。makefile不自动维护，需要主动维护
+  - 增量构建
+
+- blade配置文件
+  - blade 安装目录下的 blade.conf，这是全局配置。
+  - ~/.bladerc 用户 HOME 目录下的 .bladerc 文件，这是用户级的配置。
+  - BLADE_ROOT 其实也是个配置文件，写在这里的是项目级配置。
+  - BLADE_ROOT.local 开发者自己的本地配置文件，用于临时调整参数等用途
+
+一定要特别注意，自下而上的的进行覆盖，如果没有写单独配置，则会采用默认。至于默认是否符合项目要求，要自己判断
+
+- BUILD文件编写
+  - c/c++目标
+    - cc_library
+    - cc_binary
+    - cc_test
+  - protobuf
+
+整个build过程，并不违背程序的compile time, run time过程。所以，也还是要结合makefile对比的看。
+- compile time
+  - preprocessing
+  - compilation
+  - assembly
+  - linking
+    - compile time需要找到符号的定义。不管是.a/.so都要在这个阶段提供其他符号定义
+    - 编译通过，表明所有的符号都有声明，所有的符号都有定义。
+    - 但是，至于库是否要在此时装入，则不一定。
+      - compile time装入，就是static linking
+- run time
+  - linking
+    - run time进行库的装入，就是dynamic linking.
