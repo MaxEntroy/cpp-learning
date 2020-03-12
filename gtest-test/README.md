@@ -207,3 +207,48 @@ int main(int argc, char* argv[]) {
 ```
 
 最后，```main```函数不写也是可以的，需要```-lgtest_main```
+
+## 踩坑
+
+对于Test Fixtures进一步的学习，To create a fixture:
+1. Derive a class from ::testing::Test . Start its body with protected:, as we'll want to access fixture members from sub-classes.
+2. Inside the class, declare any objects you plan to use.
+3. If necessary, write a default constructor or SetUp() function to prepare the objects for each test. A common mistake is to spell SetUp() as Setup() with a small u - Use override in C++11 to make sure you spelled it correctly.
+4. If necessary, write a destructor or TearDown() function to release any resources you allocated in SetUp()
+5. If needed, define subroutines for your tests to share.
+
+q:第2点当中提到的，是不是测试对象数据只能在类中声明？
+>不是。在TEST_F当中也可以。但是，这将失去在类中声明的优点。在类中声明的对象，是被所有测例共享的。
+
+q:下面这段代码哪里出错了？
+```cpp
+#include <gtest/gtest.h>
+#include "warrior.h"
+
+using namespace ec;
+
+class WarriorTest : public ::testing::Test {
+ protected:
+  // void SetUp() override {}
+  // void TearDown() override {}
+
+  // Declare any objects you plan to use
+  Warrior w0;
+  Warrior w1(100, kIntermediate);
+};
+
+TEST_F(WarriorTest, HvWorks) {
+  EXPECT_EQ(w0.hv(), 0);
+  EXPECT_EQ(w1.hv(), 100);
+}
+
+TEST_F(WarriorTest, LevelWorks) {
+  EXPECT_EQ(w0.level(), kJunior);
+  EXPECT_EQ(w1.level(), kJunior);
+}
+```
+
+>上面这段错误代码会导致编译失败，具体的原因在于，我们在类中只能声明一个数据成员，数据成员的初始化是类的构造函数需要负责的工作。
+而上面这段代码误以为可以定义一个对象。
+所以，正确的做法是，声明完对象，在构造函数中进行初始化，或者利用SetUp()函数进行初始化的工作。
+
