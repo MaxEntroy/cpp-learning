@@ -1455,9 +1455,12 @@ Base class.
 */
 ```
 
-很奇怪这个结果，1.基类指针指向派生类 2.虚函数进行了重载
-但是最后没有发生多态。真正的原因就是我们上面讨论的，因为在派生类当中没有发生override，所以dynamic type checking，调用派生类
-对象的vf，但是派生类当中没有，自然调用基类的vf
+很奇怪这个结果<br>
+1. 基类指针指向派生类 
+2. 虚函数进行了override
+
+但是最后没有发生多态。真正的原因就是我们上面讨论的，因为在派生类当中没有发生override， 根据warning信息我们可以看出来是派生类对基类的虚函数进行了overload(注意，不是redefiniton也不是override，而是overload)
+从而发生static binding，所以调用基类的虚函数
 
 当我们对在派生类当中的vf，声明为override时，编译器会告诉我们明确的信息
 ```cpp
