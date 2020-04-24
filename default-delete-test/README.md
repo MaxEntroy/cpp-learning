@@ -71,3 +71,6 @@ public:
     // ...
 };
 ```
+
+参考
+[C++ Core Guidelines](https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#Rc-eqdefault)
