@@ -99,3 +99,4 @@ void Widget::Show() const {
 [PImpl](https://en.cppreference.com/w/cpp/language/pimpl)<br>
 [Compilation Firewalls](https://herbsutter.com/gotw/_100/)<br>
 [The PIMPL idiom](https://cpppatterns.com/patterns/pimpl.html)
+[Pimpl Idiom /handle body idiom](https://www.cnblogs.com/youxin/p/4300797.html)
