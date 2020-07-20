@@ -26,5 +26,9 @@ q:步骤
 
 由于我本次的core刚好卡在函数第一句处，所以入参的信息对我特别重要。
 
+q:对于给定地址的变量，如何打印？
+1. 使用命令x/s address
+
 参考<br>
 [gdb调试常用实用命令和core dump文件的生成](https://www.cnblogs.com/bodhitree/p/6077119.html)
+[https://stackoverflow.com/questions/14493707/display-value-found-at-given-address-gdb/14493796](https://stackoverflow.com/questions/14493707/display-value-found-at-given-address-gdb/14493796)
