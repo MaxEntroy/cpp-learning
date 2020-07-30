@@ -1,0 +1,12 @@
+syntax = "proto2";
+
+package foo;
+
+message Doc {
+  required string doc_id = 1;
+  optional int32 doc_type = 2;
+}
+
+message DocInfo {
+  repeated Doc doc_list = 1; 
+}

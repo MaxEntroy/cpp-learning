@@ -1,0 +1,18 @@
+syntax = "proto2";
+
+package foo;
+
+message DocInfo {
+  required string doc_id = 1;
+  optional int32 doc_type = 2;
+}
+
+message NewsInfo {
+  required int32 sequence = 1;
+  repeated DocInfo doc_infos = 2;
+}
+
+message Req {
+  required int32 trace = 1;
+  optional NewsInfo newsinfo = 2;
+}
