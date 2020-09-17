@@ -1,0 +1,13 @@
+syntax = "proto2";
+
+package foo;
+
+import "proto/art.proto";
+import "proto/video.proto";
+import "proto/doc_type.proto";
+
+message GeneralDocinfo {
+  required DocType type = 1;
+  optional Art art_news = 2;
+  optional Video video_news = 3;
+}

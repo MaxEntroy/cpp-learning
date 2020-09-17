@@ -1,0 +1,7 @@
+syntax = "proto2";
+
+package foo;
+
+message Art {
+  required string doc_id = 1; 
+}
