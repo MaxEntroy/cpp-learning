@@ -12,6 +12,8 @@ cc_test(
     "biz_test.cc"
   ],
   deps = [
-    ":biz"
+    ":biz",
+    "#gmock",
+    "#gmock_main"
   ]
 )
