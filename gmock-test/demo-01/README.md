@@ -4,7 +4,7 @@
 
 - role/user.h: 给出接口协议
 - control/biz.h,biz.cc: 给出业务逻辑实现
-- 这个demo的场景是，业务逻辑以来接口协议进行实现，但是拿不到接口定义，那么在进行测试的时候需要mock接口对象
+- 这个demo的场景是，业务逻辑依赖接口协议进行实现，但是拿不到接口定义，那么在进行测试的时候需要mock接口对象
 
 具体实现mock对象的时候，关注如下workflow
 - Writing the Mock Class
