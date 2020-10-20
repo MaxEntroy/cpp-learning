@@ -23,3 +23,6 @@
 1. One way to do it is to templatize your code
 2. you will give your code a template type argument for the type
 3. In production, you will instantiate your template with FooClass as the type argument. In tests, you will instantiate the same template with MockFooClass
+
+这会带来一个问题是，client code本来没有template语义，只是为了mock就增加了template语义，我觉得不是很合适。当然，我这个角度是业务代码的角度，假如TDD可能就不是这样了。
+下面这个链接暂时说明没有更好的方法，当然还要再看看 [Mocking non-virtual functions without modifying the production code](https://groups.google.com/g/googlemock/c/k0qY0hZfZNw)
