@@ -16,6 +16,7 @@ class MockUser : public gt::User {
 class BizTest : public ::testing::Test {
  protected:
   gt::Biz foo;
+  MockUser user;
 };
 
 TEST_F(BizTest, HandleInvlidUser) {
@@ -23,7 +24,6 @@ TEST_F(BizTest, HandleInvlidUser) {
 }
 
 TEST_F(BizTest, HandleOfflineWithLoginFailed) {
-  MockUser user;
   EXPECT_CALL(user, Online())
     .Times(1)
     .WillOnce(Return(false));
@@ -36,7 +36,6 @@ TEST_F(BizTest, HandleOfflineWithLoginFailed) {
 }
 
 TEST_F(BizTest, HandleOfflineWithLoginSuccessfullyAndPayFailed) {
-  MockUser user;
   EXPECT_CALL(user, Online())
     .Times(1)
     .WillOnce(Return(false));
@@ -52,7 +51,6 @@ TEST_F(BizTest, HandleOfflineWithLoginSuccessfullyAndPayFailed) {
 }
 
 TEST_F(BizTest, HandleOfflineWithLoginSuccessfullyAndPaySuccessfully) {
-  MockUser user;
   EXPECT_CALL(user, Online())
     .Times(1)
     .WillOnce(Return(false));
@@ -68,7 +66,6 @@ TEST_F(BizTest, HandleOfflineWithLoginSuccessfullyAndPaySuccessfully) {
 }
 
 TEST_F(BizTest, HandleOnlineWithPaySuccessfully) {
-  MockUser user;
   EXPECT_CALL(user, Online())
     .Times(1)
     .WillOnce(Return(true));
@@ -81,7 +78,6 @@ TEST_F(BizTest, HandleOnlineWithPaySuccessfully) {
 }
 
 TEST_F(BizTest, HandleOnlineWithPayFailed) {
-  MockUser user;
   EXPECT_CALL(user, Online())
     .Times(1)
     .WillOnce(Return(true));
@@ -91,5 +87,4 @@ TEST_F(BizTest, HandleOnlineWithPayFailed) {
 
   foo.SetUser(&user);
   EXPECT_FALSE(foo.Pay("admin", "123", 100));
-
 }
