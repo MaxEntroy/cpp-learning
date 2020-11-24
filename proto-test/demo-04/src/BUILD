@@ -1,7 +1,7 @@
 cc_binary(
-  name = "foo_test",
+  name = "main",
   srcs = [
-    "foo_test.cc"
+    "main.cc"
   ],
   deps = [
     "//proto:foo_proto",
