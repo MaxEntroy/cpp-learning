@@ -38,23 +38,30 @@ bool GetValue(const goo_proto::Message& msg, const std::string& field_name, Valu
   auto field_descriptor = descriptor->FindFieldByName(field_name);
   auto reflection = msg.GetReflection();
 
-  *out = (reflection->*(ProtoFunc<ValueType>::GetFieldFunc))(msg, field_descriptor);
+  try {
+    *out = (reflection->*(ProtoFunc<ValueType>::GetFieldFunc))(msg, field_descriptor);
+  } catch (const std::exception& e) {
+    return false;
+  }
   return true;
 }
 
 int main(void) {
   Foo foo;
   InitFoo(&foo);
-  ShowFoo(foo);
 
   goo_proto::int32 val = 0;
   GetValue(foo, "grade", &val);
   std::cout << val << std::endl;
 
   goo_proto::string str;
-  GetValue(foo, "name", &str);
+  bool ret = GetValue(foo, "name", &str);
+  if (!ret) {
+    std::cerr << "GetValue failure.";
+  }
   std::cout << str << std::endl;
 
+  ShowFoo(foo);
   return 0;
 }
 
