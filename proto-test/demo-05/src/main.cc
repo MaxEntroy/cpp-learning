@@ -109,7 +109,12 @@ bool GetValuePtr(const goo_proto::Message& msg, const std::string& field_name, c
     return nullptr;
   }
 
-  *pptr =  &((reflection->*(ProtoFuncRef<ValueType>::GetFieldFuncRef))(msg, field_descriptor, nullptr));
+  try {
+    *pptr = &((reflection->*(ProtoFuncRef<ValueType>::GetFieldFuncRef))(msg, field_descriptor, nullptr));
+  } catch(std::exception& e) {
+    return false;
+  }
+
   return true;
 }
 
@@ -117,12 +122,18 @@ void TestGetValuePtr() {
   Foo foo;
   InitFoo(&foo);
 
-  const std::string* name = nullptr;
-  GetValuePtr(foo, "name", &name);
-  std::cout << *name << std::endl;
+  //const std::string* name = nullptr;
+  //if(!GetValuePtr(foo, "fam", &name)) {
+  //  std::cerr << "Error" << std::endl;
+  //}
 
-  //const goo_proto::Message* msg = nullptr;
-  //GetValuePtr(foo, "fam", &msg);
+  const goo_proto::Message* msg = nullptr;
+  GetValuePtr(foo, "fam", &msg);
+
+  const Family* fam = dynamic_cast<const Family*>(msg);
+  if (fam) {
+    std::cout << fam->father() << std::endl;
+  }
 
   //const std::string* father = nullptr;
   //GetValuePtr(*msg, "father", &father);
