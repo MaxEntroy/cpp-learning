@@ -10,4 +10,6 @@ message Foo {
   optional string name = 2;
   optional int64 total = 3;
   optional Family fam = 4;
+  optional bytes id = 5;
+  optional bytes reason_flag = 6;
 }

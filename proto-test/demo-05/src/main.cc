@@ -135,6 +135,14 @@ void TestGetValuePtr() {
     std::cout << fam->father() << std::endl;
   }
 
+  const std::string* id = nullptr;
+  GetValuePtr(foo, "id", &id);
+  std::cout << *id << std::endl;
+
+  const std::string* reason_flag = nullptr;
+  GetValuePtr(foo, "reason_flag", &reason_flag);
+  std::cout << *reason_flag << std::endl;
+
   //const std::string* father = nullptr;
   //GetValuePtr(*msg, "father", &father);
   //std::cout << *father << std::endl;
@@ -153,6 +161,8 @@ void InitFoo(Foo* foo) {
   foo->set_grade(98);
   foo->set_name("kang");
   foo->set_total(100);
+  foo->set_id("20200802A301");
+  foo->set_reason_flag("ICF");
 
   Family* fam = foo->mutable_fam();
   fam->set_father("dad");
