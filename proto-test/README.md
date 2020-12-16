@@ -56,3 +56,4 @@ void TruncReq1(foo::Req* req) {
 2. A static library is basically a set of object files that were copied into a single file with the suffix .a.
 
 进一步来说，.a是一堆独立的.o集合。而.o则是```g++ -c xx.c```形成，所以这部分并没有linking. 而最终的.a则是```ar rcs libxxx.a xxx1.o xxx2.o```，只是简单的利用ar命令进行归档
+对于.a，我们可以把不同的.a归档到一个.a，这是可以的。我在这个demo中，将proto相关.a，归档到utils相关的.a当中，这是可以的。
