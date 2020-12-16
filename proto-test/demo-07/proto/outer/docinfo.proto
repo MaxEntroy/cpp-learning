@@ -1,0 +1,10 @@
+syntax = "proto2";
+
+import "proto/embedded/art.proto";
+import "proto/embedded/vid.proto";
+
+message DocInfo {
+  required string doc_type = 1;
+  optional Art art = 2;
+  optional Vid vid = 3;
+};
