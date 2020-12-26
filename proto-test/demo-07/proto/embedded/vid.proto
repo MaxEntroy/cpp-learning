@@ -1,0 +1,5 @@
+syntax = "proto2";
+
+message Vid {
+  required string id = 1;
+}

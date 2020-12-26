@@ -9,5 +9,8 @@ message Foo {
   required int32 grade = 1;
   optional string name = 2;
   optional int64 total = 3;
-  optional Family family = 4;
+  optional Family fam = 4;
+  optional bytes id = 5;
+  optional bytes reason_flag = 6;
+  repeated Family family_list = 7;
 }

@@ -46,6 +46,49 @@ bool GetValue(const goo_proto::Message& msg, const std::string& field_name, Valu
   return true;
 }
 
+const std::string& GetStringRef(const goo_proto::Message& msg, const std::string& field_name) {
+  auto descriptor = msg.GetDescriptor();
+  auto field_descriptor = descriptor->FindFieldByName(field_name);
+  auto reflection = msg.GetReflection();
+
+  return reflection->GetStringReference(msg, field_descriptor, nullptr);
+}
+
+const goo_proto::Message& GetMessageRef(const goo_proto::Message& msg, const std::string& field_name) {
+  auto descriptor = msg.GetDescriptor();
+  auto field_descriptor = descriptor->FindFieldByName(field_name);
+  auto reflection = msg.GetReflection();
+
+  return reflection->GetMessage(msg, field_descriptor);
+}
+
+template <typename Param>
+struct ProtoFuncRef
+{
+    static constexpr void* GetFieldFuncRef = nullptr;
+};
+
+template <>
+struct ProtoFuncRef<std::string>
+{
+  static constexpr auto GetFieldFuncRef = &goo_proto::Reflection::GetStringReference;
+};
+
+template <>
+struct ProtoFuncRef<goo_proto::Message>
+{
+  static constexpr auto GetFieldFuncRef = &goo_proto::Reflection::GetMessage;
+};
+
+template<typename ValueType>
+const ValueType& GetValueRef(const goo_proto::Message& msg, const std::string& field_name) {
+  auto descriptor = msg.GetDescriptor();
+  auto field_descriptor = descriptor->FindFieldByName(field_name);
+  auto reflection = msg.GetReflection();
+
+  return (reflection->*(ProtoFuncRef<ValueType>::GetFieldFuncRef))(msg, field_descriptor, nullptr);
+}
+
 int main(void) {
   Foo foo;
   InitFoo(&foo);
@@ -61,7 +104,14 @@ int main(void) {
   }
   std::cout << str << std::endl;
 
-  ShowFoo(foo);
+  //const std::string& name_ref = GetStringRef(foo, "name");
+  //std::cout << "GetStringRef: " << name_ref << std::endl;
+  const std::string& name_ref = GetValueRef<std::string>(foo, "name");
+  std::cout << "GetStringRef: " << name_ref << std::endl;
+
+  //const goo_proto::Message& family = GetMessageRef(foo, "family");
+  //const std::string& father_ref = GetStringRef(family, "father");
+  //std::cout << father_ref << std::endl;
   return 0;
 }
 
@@ -69,6 +119,10 @@ void InitFoo(Foo* foo) {
   foo->set_grade(98);
   foo->set_name("kang");
   foo->set_total(100);
+
+  Family* fam = foo->mutable_family();
+  fam->set_father("dad");
+  fam->set_mother("mom");
 }
 
 void ShowFoo(const Foo& foo) {

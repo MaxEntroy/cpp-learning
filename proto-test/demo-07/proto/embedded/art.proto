@@ -1,0 +1,5 @@
+syntax = "proto2";
+
+message Art {
+  required string id = 1;
+}
