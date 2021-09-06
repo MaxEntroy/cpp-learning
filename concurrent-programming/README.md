@@ -5,6 +5,11 @@ q:critical section(region)?
 >
 >In a short, the program where the shared resource is concurrent access.
 
+q:race condition?
+>A race condition or race hazard is the condition of an electronics, software, or other system where the system's substantive behavior is dependent on the sequence or timing of other uncontrollable events. It becomes a bug when one or more of the possible behaviors is undesirable.
+>
+>上面是wiki的解释，我来翻译一下。程序并发执行的前提下，程序的运行结果依赖特定的执行顺序，但是这个执行顺序是不可控的，导致最后的结果也不可控。所以，race condition的主要危害是会导致undefined behavior
+
 q:机器层面的原子操作是什么？
 >这个问题困扰我一段时间，我们知道程序可以并发执行，即指令可以交替执行。那么，这些交替执行的指令，他们的最小单位是什么。
 即，是否一条指令执行一半，pending，另一条指令接着执行。这种情况下，指令就不是最小机器层面的原子单位。
@@ -14,8 +19,7 @@ q:机器层面的原子操作是什么？
 这里可以参考emc的item 40，其中提到的R-M-W operations，这其中每一个回避指令是一个原子单位，所以并发编程时，需要考虑的就是
 这种原子粒度下，如何保证程序的正确性.
 
-这里更新一下，根据最新的只是，汇编指令级别也不是原子级别。
-
+这里更新一下，根据最新的知识，汇编指令级别也不是原子级别。这里只能这么做，反着来，我不能确定谁是原子的，但是我一定知道谁不是原子的。碰到这种情形，上同步语义。
 
 [How Computers Work: The CPU and Memory](https://homepage.cs.uri.edu/faculty/wolfe/book/Readings/Reading04.htm)<br>
 [汇编指令是原子操作吗?](https://www.zhihu.com/question/28092666/answer/47771188?utm_medium=social&utm_oi=658626377876639744&utm_source=wechat_session&s_r=0)
