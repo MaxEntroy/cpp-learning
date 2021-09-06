@@ -1,0 +1,2 @@
+- demo-01: perf流程跑通 这里需要注意一点是，统计时间要足够长才行. 默认是10ms采样一次
+- demo-02: perf L1-dcache-load-misses 想测试这个事件，但是发现没区别
