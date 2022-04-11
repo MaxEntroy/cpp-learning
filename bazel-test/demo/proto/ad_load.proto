@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package demo;
+
+message AdItemInfo {
+  // 广告item id
+  string id = 1;
+}
+
+message AdLoad {
+  //// 广告位置信息
+  //repeated int32 pos = 1;
+  //// 广告item 
+  //repeated AdItemInfo ad_items = 2;
+
+  // 广告item
+  map<int32, AdItemInfo> ad_items = 1;
+}
