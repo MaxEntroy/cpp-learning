@@ -7,9 +7,13 @@ void ShowAdLoad(const AdLoad& ad_load);
 
 
 int main(void) {
-  demo::AdLoad ad_load;
-  GenerateAdLoad(&ad_load);
-  ShowAdLoad(ad_load);
+  constexpr int kIterNum{10};
+  for (int i = 0; i < kIterNum; ++i) {
+    std::cout << "------------------ " << i + 1 << "th iter" << "------------------ " << std::endl;
+    demo::AdLoad ad_load;
+    GenerateAdLoad(&ad_load);
+    ShowAdLoad(ad_load);
+  }
   return 0;
 }
 
@@ -26,3 +30,46 @@ void ShowAdLoad(const AdLoad& ad_load) {
 }
 
 }  // namespace demo
+
+/**
+------------------ 1th iter------------------
+pos:3, cmsid:20220321A301
+pos:8, cmsid:20220321A302
+pos:5, cmsid:20220321A302
+------------------ 2th iter------------------
+pos:3, cmsid:20220321A301
+pos:8, cmsid:20220321A302
+pos:5, cmsid:20220321A302
+------------------ 3th iter------------------
+pos:3, cmsid:20220321A301
+pos:8, cmsid:20220321A302
+pos:5, cmsid:20220321A302
+------------------ 4th iter------------------
+pos:5, cmsid:20220321A302
+pos:3, cmsid:20220321A301
+pos:8, cmsid:20220321A302
+------------------ 5th iter------------------
+pos:5, cmsid:20220321A302
+pos:3, cmsid:20220321A301
+pos:8, cmsid:20220321A302
+------------------ 6th iter------------------
+pos:8, cmsid:20220321A302
+pos:3, cmsid:20220321A301
+pos:5, cmsid:20220321A302
+------------------ 7th iter------------------
+pos:3, cmsid:20220321A301
+pos:8, cmsid:20220321A302
+pos:5, cmsid:20220321A302
+------------------ 8th iter------------------
+pos:5, cmsid:20220321A302
+pos:3, cmsid:20220321A301
+pos:8, cmsid:20220321A302
+------------------ 9th iter------------------
+pos:5, cmsid:20220321A302
+pos:3, cmsid:20220321A301
+pos:8, cmsid:20220321A302
+------------------ 10th iter------------------
+pos:5, cmsid:20220321A302
+pos:3, cmsid:20220321A301
+pos:8, cmsid:20220321A302
+*/
