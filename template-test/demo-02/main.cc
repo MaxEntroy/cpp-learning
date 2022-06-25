@@ -131,7 +131,7 @@ void test() {
   g(std::move(v1), v2);
   std::cout << "[External]v1 = " << v1 << ", v2 = " << v2 << std::endl;
 
-  // flip(g, 5, v2);
+  flip(g, 5, v2);
   //5 is rvalue,   T1 = int,  std::forward<T1> -> int&&, matches g->v1
   //v2 is lvalue,  T2 = int&, std::forward<T2> -> int&, matches g->v2
 
@@ -145,6 +145,37 @@ void test() {
 // std::forward preserves the nature of lvalue/rvalue of its corresponding argument
 
 }  // namespace version5
+
+namespace base {
+
+template<typename T>
+T GetRvalue(T t) {
+  return t;
+}
+
+struct Foo {};
+
+void Bar(int&& val) {
+  std::cout << val << std::endl;
+}
+
+void test() {
+  int&& rr1 = 3;  // legal
+
+  int val = 3;
+  // int&& rr2 = val;  // illegal
+
+  int&& rr3 = GetRvalue(val);  // legal
+
+  int&& rr4 = std::move(val);  // legal
+
+  Foo foo;
+  //int&& rr5 = std::move(foo);  // illegal type mismatch
+
+  Bar(GetRvalue(rr4));  // illegal
+}
+
+}  // namespace base
 
 int main(void) {
   version5::test();
