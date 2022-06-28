@@ -146,9 +146,118 @@ void test() {
 
 }  // namespace version5
 
-namespace base {
+namespace version6 {
+
+template <typename T>
+T GetRvalue(T t) {
+  return t;
+}
+
+template<typename F, typename T1, typename T2>
+void flip1(F f, T1&& t1, T2&& t2) {
+  f(GetRvalue<T1>(t1), GetRvalue<T2>(t2));
+}
+
+template<typename F, typename T1, typename T2>
+void flip2(F f, T1&& t1, T2&& t2) {
+  f(std::forward<T1>(t1), std::forward<T2>(t2));
+}
+
+void g(int&& v1, int& v2) {
+  v1 *= 2;
+  v2 *= 2;
+  std::cout << "[Internal]v1 = " << v1 << ", v2 = " << v2 << std::endl;
+}
+
+void test1() {
+  int val1 = 8;
+  flip1(g, 5, val1);
+  std::cout << "[External]val1 = " << val1 << std::endl;
+
+  int val2 = 8;
+  flip2(g, 5, val2);
+  std::cout << "[External]val2 = " << val2 << std::endl;
+}
+// 结论证明 val1 and val2值一样，即flip1 and flip2的实现，对于lvalue-reference没有区别
+
+void test2() {
+  int val = 1;
+  int val1 = 8;
+  flip1(g, std::move(val1), val);
+  std::cout << "[External]val1 = " << val1 << std::endl;
+
+  int val2 = 8;
+  flip2(g, std::move(val2), val);
+  std::cout << "[External]val2 = " << val2 << std::endl;
+}
+// 结论证明val1的值没变，val2的值变了。原因在于T1推到类型为int，但是flip1的第一个参数是int, flip2的第一个参数是int&&，是一个引用，自然能反映对于原变量的修改
+// 这也是GetRvalue不如forward的地方
+}  // namespace version6
+
+namespace version7 {
+
+template<typename F, typename T1, typename T2>
+void flip1(F f, T1&& t1, T2&& t2) {
+  f(std::forward<T1>(t1) , std::forward<T2>(t2));
+}
+
+void g(int&& v1, int& v2) {
+  v1 *= 2;
+  v2 *= 2;
+  std::cout << "[Internal]v1 = " << v1 << ", v2 = " << v2 << std::endl;
+}
+
+void f(int& v1, int&& v2) {
+  v1 *= 2;
+  v2 *= 2;
+  std::cout << "[Internal]v1 = " << v1 << ", v2 = " << v2 << std::endl;
+}
+
+void test() {
+  int val = 3;
+  int& r = val;
+  flip1(g, 5, r);
+  std::cout << "[External]r = " << r << std::endl;
+
+  flip1(f, r, 5);
+  std::cout << "[External]r = " << r << std::endl;
+}
+
+}  // namespace version7
+
+namespace version8 {
 
 template<typename T>
+T&& myforward(T& param) {
+  return static_cast<T&&>(param);
+}
+
+//template<typename T>
+//T&& myforward(T&& param) {
+//  return static_cast<T&&>(param);
+//}
+
+template<typename F, typename T1>
+void flip(F f, T1&& t1) {
+  f(myforward(t1));
+  //f(std::forward<T1>(t1) , std::forward<T2>(t2));
+}
+
+void g(int& v1) {
+  v1 *= 2;
+}
+
+void test() {
+  int val = 3;
+  int& r = val;
+  flip(g, r);
+}
+
+}  // namespace version8
+
+namespace base {
+
+template <typename T>
 T GetRvalue(T t) {
   return t;
 }
@@ -178,6 +287,6 @@ void test() {
 }  // namespace base
 
 int main(void) {
-  version5::test();
+  version8::test();
   return 0;
 }

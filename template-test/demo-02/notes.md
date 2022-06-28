@@ -43,8 +43,11 @@ void Test() {
 因为```int&&```不能当做一个整体的类型去看
 
 ```int&& val```的语义是这样：
-- val只能绑右值
-- 绑定值的类型是int
+- 首先，这是一个引用类型，表明对引用的修改即会反映到原值上
+- 其次，这个引用类型所绑定的值类型是整型，表明该引用只能绑整型
+- 最后，这个引用只能绑右值
+
+**不能用形式上的类型去看，对于别的类型可以，但是对于T&&类型不行**。
 
 对于```rr```来说，它本身是一个lvalue，所以函数调用时，第一步判断就失败。因为```val```只能绑定右值
 这就是上面为什么强调**在绑左值还是绑右值这件事上，类型不起作用**，本质是想强调需要分两步看这个类型声明
@@ -68,20 +71,55 @@ void Test() {
 }
 ```
 
-那既然这个函数可以，为什么我们还需要std::move/std::forward，我们看move的实现。
+那既然这个函数可以，为什么我们还需要std::forward，我们看下面的例子
 
 ```cpp
-// remove_reference is covered in § 16.2.3 (p. 684)
 template <typename T>
-typename remove_reference<T>::type&& move(T&& t)
-{
-  // static_cast covered in § 4.11.3 (p. 163)
-  return static_cast<typename remove_reference<T>::type&&>(t);
+T GetRvalue(T t) {
+  return t;
+}
+
+template<typename F, typename T1, typename T2>
+void flip1(F f, T1&& t1, T2&& t2) {
+  f(GetRvalue<T1>(t1), GetRvalue<T2>(t2));
+}
+
+template<typename F, typename T1, typename T2>
+void flip2(F f, T1&& t1, T2&& t2) {
+  f(std::forward<T1>(t1), std::forward<T2>(t2));
+}
+
+void g(int&& v1, int& v2) {
+  v1 *= 2;
+  v2 *= 2;
+  std::cout << "[Internal]v1 = " << v1 << ", v2 = " << v2 << std::endl;
+}
+
+void test1() {
+  int val1 = 8;
+  flip1(g, 5, val1);
+  std::cout << "[External]val1 = " << val1 << std::endl;
+
+  int val2 = 8;
+  flip2(g, 5, val2);
+  std::cout << "[External]val2 = " << val2 << std::endl;
+}
+// 结论证明 val1 and val2值一样，即flip1 and flip2的实现，对于lvalue-reference没有区别
+
+void test2() {
+  int val = 1;
+  int val1 = 8;
+  flip1(g, std::move(val1), val);
+  std::cout << "[External]val1 = " << val1 << std::endl;
+
+  int val2 = 8;
+  flip2(g, std::move(val2), val);
+  std::cout << "[External]val2 = " << val2 << std::endl;
+}
+// 结论证明val1的值没变，val2的值变了。原因在于T1推到类型为int，但是flip1的第一个参数是int, flip2的第一个参数是int&&，是一个引用，自然能反映对于原变量的修改
+// 这也是GetRvalue不如forward的地方
 ```
 
-先来回答一个基本问题，为什么Bar的参数```int&& val```不可以接受rr，而move的参数```T&& t```可以接受rr。
-因为后者是universal reference，而前者不是。
+很明显，std::forward<T> return T&&，本质是返回了一个引用类型，引用类型表明：对于该引用的修改会反映到关联值上，但是GetRvalue<T> return T，返回的是值类型，对于该值的修改，不会反映到原变量上。
 
-我们再来看，move到底比GetRvalue好在哪？后者没有reference collapsing的能力，后者不管任何情况，t的类型就是T。但是前者可能是T&，也可能是T&&，即前者保留了一个引用变量的左右值属性，也即保留了一个引用变量绑定值的属性(lvalue or rvalue).
-
-最终，我们把话题说回lvalue/rvalue，rvalue存在的意义只有一个，即这个变量的值可以被窃取。
+这里多说一点，std::move和std::forward的区别在于，后者有reference collapsing，而前者不行。
